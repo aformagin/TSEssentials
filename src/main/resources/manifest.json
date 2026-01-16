@@ -1,0 +1,20 @@
+{
+  "Group": "Thirdspare",
+  "Name": "TSEssentials",
+  "Version": "1.0.0",
+  "Description": "Just the essentials.",
+  "Authors": [
+    {
+      "Name": "Auti117",
+      "Email": "",
+      "Url": ""
+    }
+  ],
+  "Website": "https://thirdspare.com",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": false,
+  "Main": "com.thirdspare.TSEssentials"
+}
