@@ -10,6 +10,7 @@ import com.thirdspare.data.PlayerDataConfig;
 import com.thirdspare.data.SpawnConfig;
 import com.thirdspare.data.WarpConfig;
 import com.thirdspare.events.ExampleEvent;
+import com.thirdspare.tpa.TeleportRequestManager;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -28,6 +29,7 @@ public class TSEssentials extends JavaPlugin {
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
     private SpawnConfig spawnData;
+    private TeleportRequestManager teleportRequestManager;
 
     public TSEssentials(@Nonnull JavaPluginInit init) {
         super(init);
@@ -47,6 +49,9 @@ public class TSEssentials extends JavaPlugin {
         spawnData = spawnDataConfig.get();
         this.getLogger().at(Level.INFO).log("Server spawn " + (spawnData.hasSpawn() ? "loaded" : "not set"));
 
+        /* Initialize TPA request manager */
+        teleportRequestManager = new TeleportRequestManager();
+
         /* Command Registry */
         this.getCommandRegistry().registerCommand(new SetHomeCommand("sethome", "Sets the users home at their current location!", this));
         this.getCommandRegistry().registerCommand(new HomeCommand("home", "Teleports user to their set home location!", this));
@@ -56,6 +61,13 @@ public class TSEssentials extends JavaPlugin {
 
         this.getCommandRegistry().registerCommand(new SetSpawnCommand("setspawn", "Sets the server spawn location!", this));
         this.getCommandRegistry().registerCommand(new SpawnCommand("spawn", "Teleports to the server spawn!", this));
+
+        this.getCommandRegistry().registerCommand(new TpaCommand("tpa", "Request to teleport to another player", this));
+        this.getCommandRegistry().registerCommand(new TpaHereCommand("tpahere", "Request another player to teleport to you", this));
+        this.getCommandRegistry().registerCommand(new TpAcceptCommand("tpaccept", "Accept a pending teleport request", this));
+        this.getCommandRegistry().registerCommand(new TpDenyCommand("tpdeny", "Deny a pending teleport request", this));
+        this.getCommandRegistry().registerCommand(new TpHereCommand("tphere", "Force teleport a player to you (admin)", this));
+
         /* Event Registry */
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, ExampleEvent::onPlayerReady);
     }
@@ -112,5 +124,14 @@ public class TSEssentials extends JavaPlugin {
         spawnDataConfig.save().thenRun(() -> {
             getLogger().at(Level.INFO).log("Spawn data saved successfully");
         });
+    }
+
+    /**
+     * Get the teleport request manager
+     *
+     * @return The teleport request manager instance
+     */
+    public TeleportRequestManager getTeleportRequestManager() {
+        return teleportRequestManager;
     }
 }
