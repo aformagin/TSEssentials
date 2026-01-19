@@ -6,7 +6,7 @@
 
     <groupId>com.thirdspare</groupId>
     <artifactId>TSEssentials</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT-BUG-FIX</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>

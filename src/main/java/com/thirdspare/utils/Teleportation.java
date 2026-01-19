@@ -45,13 +45,12 @@ public class Teleportation {
             if (playerRef.getReference() == null) return;
             Store<EntityStore> store = playerRef.getReference().getStore();
 
-            // Create transform with position and rotation (pitch, yaw, roll)
+            // Create position and rotation vectors
             Vector3d position = new Vector3d(x, y, z);
             Vector3f rotation = new Vector3f(pitch, yaw, roll);
-            Transform transform = new Transform(position, rotation);
 
             // Create and apply teleport component
-            Teleport teleport = new Teleport(transform);
+            Teleport teleport = new Teleport(position, rotation);
             store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
         });
     }
@@ -78,12 +77,11 @@ public class Teleportation {
             // Get current rotation to preserve it
             Vector3f currentRotation = playerRef.getTransform().getRotation();
 
-            // Create transform with new position and current rotation
+            // Create position vector
             Vector3d position = new Vector3d(x, y, z);
-            Transform transform = new Transform(position, currentRotation);
 
             // Create and apply teleport component
-            Teleport teleport = new Teleport(transform);
+            Teleport teleport = new Teleport(position, currentRotation);
             store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
         });
     }
@@ -105,8 +103,8 @@ public class Teleportation {
             if (playerRef.getReference() == null) return;
             Store<EntityStore> store = playerRef.getReference().getStore();
 
-            // Create and apply teleport component
-            Teleport teleport = new Teleport(transform);
+            // Create and apply teleport component using transform's position and rotation
+            Teleport teleport = new Teleport(transform.getPosition(), transform.getRotation());
             store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
         });
     }

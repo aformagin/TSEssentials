@@ -153,7 +153,7 @@ public class PlayerDataConfig {
                             key -> key,  // String -> String (no conversion needed)
                             str -> str   // String -> String (no conversion needed)
                     )),
-                    (config, val) -> config.playerHomes = val,
+                    (config, val) -> config.playerHomes = val != null ? new HashMap<>(val) : new HashMap<>(),
                     config -> config.playerHomes).add()
             .build();
 }

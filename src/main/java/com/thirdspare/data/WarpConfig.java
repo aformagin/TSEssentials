@@ -112,7 +112,7 @@ public class WarpConfig {
                             key -> key,  // String -> String (no conversion needed)
                             str -> str   // String -> String (no conversion needed)
                     )),
-                    (config, val) -> config.warps = val,
+                    (config, val) -> config.warps = val != null ? new HashMap<>(val) : new HashMap<>(),
                     config -> config.warps).add()
             .build();
 }
