@@ -1,11 +1,16 @@
 package com.thirdspare.commands;
 
+import com.hypixel.hytale.math.vector.Transform;
+import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.protocol.ItemWithAllMetadata;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.spawn.GlobalSpawnProvider;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.SpawnData;
@@ -65,6 +70,21 @@ public class SetSpawnCommand extends AbstractCommand {
 
         plugin.getSpawnData().setSpawn(spawnData);
         plugin.saveSpawnData();
+
+        // Update the world's native spawn provider so new players, death respawns,
+        // and the map marker all use this location.
+        // Must create new vector instances - Transform stores references, not copies.
+        World world = Universe.get().getWorld(worldUUID);
+        if (world != null) {
+            Vector3d spawnPosition = new Vector3d(
+                    playerTransformPosition.getX(),
+                    playerTransformPosition.getY(),
+                    playerTransformPosition.getZ()
+            );
+            Vector3f spawnRotation = new Vector3f(0, playerTransformRotation.getYaw(), 0);
+            Transform spawnTransform = new Transform(spawnPosition, spawnRotation);
+            world.getWorldConfig().setSpawnProvider(new GlobalSpawnProvider(spawnTransform));
+        }
 
         // Send the notification
         var packetHandler = playerRef.getPacketHandler();
