@@ -1,14 +1,11 @@
 package com.thirdspare.commands;
 
-import com.hypixel.hytale.protocol.ItemWithAllMetadata;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
-import com.hypixel.hytale.server.core.universe.Universe;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.SpawnData;
+import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
 
@@ -27,16 +24,8 @@ public class SpawnCommand extends AbstractCommand {
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext commandContext) {
-        if (!commandContext.isPlayer()) {
-            commandContext.sendMessage(Message.raw("This command can only be used by players!").color("#FF0000"));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        var playerUUID = commandContext.sender().getUuid();
-        var playerRef = Universe.get().getPlayer(playerUUID);
-
+        PlayerRef playerRef = CommandUtils.getPlayerFromContext(commandContext, true);
         if (playerRef == null) {
-            commandContext.sendMessage(Message.raw("Unable to find player!").color("#FF0000"));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -45,18 +34,9 @@ public class SpawnCommand extends AbstractCommand {
 
         if (spawnData == null) {
             // Spawn not set - send error notification
-            var packetHandler = playerRef.getPacketHandler();
-            if (packetHandler != null) {
-                var primaryMessage = Message.raw("Spawn Not Set!").color("#FF0000");
-                var secondaryMessage = Message.raw("No server spawn has been configured.").color("#FF6B6B");
-                var icon = new ItemStack(StaticVariables.SPAWN_ICON, 1).toPacket();
-
-                NotificationUtil.sendNotification(
-                        packetHandler,
-                        primaryMessage,
-                        secondaryMessage,
-                        (ItemWithAllMetadata) icon);
-            }
+            CommandUtils.sendNotification(playerRef, "Spawn Not Set!", "#FF0000",
+                    "No server spawn has been configured.", "#FF6B6B",
+                    StaticVariables.SPAWN_ICON);
             return CompletableFuture.completedFuture(null);
         }
 
@@ -69,18 +49,9 @@ public class SpawnCommand extends AbstractCommand {
         );
 
         // Send success notification
-        var packetHandler = playerRef.getPacketHandler();
-        if (packetHandler != null) {
-            var primaryMessage = Message.raw("Teleporting!").color("#00FF00");
-            var secondaryMessage = Message.raw("Warping to spawn!").color("#228B22");
-            var icon = new ItemStack(StaticVariables.SPAWN_ICON, 1).toPacket();
-
-            NotificationUtil.sendNotification(
-                    packetHandler,
-                    primaryMessage,
-                    secondaryMessage,
-                    (ItemWithAllMetadata) icon);
-        }
+        CommandUtils.sendNotification(playerRef, "Teleporting!", "#00FF00",
+                "Warping to spawn!", "#228B22",
+                StaticVariables.SPAWN_ICON);
 
         return CompletableFuture.completedFuture(null);
     }

@@ -1,16 +1,14 @@
 package com.thirdspare.commands;
 
-import com.hypixel.hytale.protocol.ItemWithAllMetadata;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
-import com.hypixel.hytale.server.core.universe.Universe;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.WarpData;
+import com.thirdspare.utils.CommandUtils;
+import com.thirdspare.utils.StaticVariables;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,16 +27,8 @@ public class SetWarpCommand extends AbstractCommand {
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext commandContext) {
-        if (!commandContext.isPlayer()) {
-            commandContext.sendMessage(Message.raw("This command can only be used by players!").color("#FF0000"));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        var playerUUID = commandContext.sender().getUuid();
-        var playerRef = Universe.get().getPlayer(playerUUID);
-
+        PlayerRef playerRef = CommandUtils.getPlayerFromContext(commandContext, true);
         if (playerRef == null) {
-            commandContext.sendMessage(Message.raw("Unable to find player!").color("#FF0000"));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -46,7 +36,9 @@ public class SetWarpCommand extends AbstractCommand {
         String warpName = commandContext.get(warpNameArg);
 
         if (warpName == null || warpName.isEmpty()) {
-            commandContext.sendMessage(Message.raw("Please specify a warp name!").color("#FF0000"));
+            CommandUtils.sendNotification(playerRef, "Invalid Warp Name!", "#FF0000",
+                    "Please specify a warp name.", "#FF6B6B",
+                    StaticVariables.WARP_ICON);
             return CompletableFuture.completedFuture(null);
         }
 
@@ -78,19 +70,9 @@ public class SetWarpCommand extends AbstractCommand {
         plugin.saveWarpData();
 
         // Send the notification
-        var packetHandler = playerRef.getPacketHandler();
-        if (packetHandler != null) {
-            var primaryMessage = Message.raw("Success!").color("#00FF00");
-            var secondaryMessage = Message.raw("Warp '" + warpName + "' has been " +
-                    (isUpdate ? "updated" : "created") + ".").color("#228B22");
-            var icon = new ItemStack("Furniture_Village_Brazier", 1).toPacket();
-
-            NotificationUtil.sendNotification(
-                    packetHandler,
-                    primaryMessage,
-                    secondaryMessage,
-                    (ItemWithAllMetadata) icon);
-        }
+        CommandUtils.sendNotification(playerRef, "Success!", "#00FF00",
+                "Warp '" + warpName + "' has been " + (isUpdate ? "updated" : "created") + ".", "#228B22",
+                StaticVariables.WARP_ICON);
 
         return CompletableFuture.completedFuture(null);
     }
