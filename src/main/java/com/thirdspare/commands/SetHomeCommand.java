@@ -63,12 +63,12 @@ public class SetHomeCommand extends AbstractCommand {
         //Save current location to data file
         PlayerHomeData homeData = new PlayerHomeData(
                 worldUUID.toString(),
-                playerTransformPosition.getX(),
-                playerTransformPosition.getY(),
-                playerTransformPosition.getZ(),
-                playerTransformRotation.getPitch(),
-                playerTransformRotation.getYaw(),
-                playerTransformRotation.getRoll()
+                playerTransformPosition.x(),
+                playerTransformPosition.y(),
+                playerTransformPosition.z(),
+                playerTransformRotation.pitch(),
+                playerTransformRotation.yaw(),
+                playerTransformRotation.roll()
         );
 
         plugin.getPlayerData().setHome(playerUUID, homeName, homeData);

@@ -58,12 +58,12 @@ public class SetWarpCommand extends AbstractCommand {
         // Save current location to warp data file
         WarpData warpData = new WarpData(
                 worldUUID.toString(),
-                playerTransformPosition.getX(),
-                playerTransformPosition.getY(),
-                playerTransformPosition.getZ(),
-                playerTransformRotation.getPitch(),
-                playerTransformRotation.getYaw(),
-                playerTransformRotation.getRoll()
+                playerTransformPosition.x(),
+                playerTransformPosition.y(),
+                playerTransformPosition.z(),
+                playerTransformRotation.pitch(),
+                playerTransformRotation.yaw(),
+                playerTransformRotation.roll()
         );
 
         plugin.getWarpData().setWarp(warpName, warpData);

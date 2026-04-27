@@ -1,8 +1,7 @@
 package com.thirdspare.commands;
 
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -50,12 +49,12 @@ public class SetSpawnCommand extends AbstractCommand {
         // Save current location as spawn
         SpawnData spawnData = new SpawnData(
                 worldUUID.toString(),
-                playerTransformPosition.getX(),
-                playerTransformPosition.getY(),
-                playerTransformPosition.getZ(),
-                playerTransformRotation.getPitch(),
-                playerTransformRotation.getYaw(),
-                playerTransformRotation.getRoll()
+                playerTransformPosition.x(),
+                playerTransformPosition.y(),
+                playerTransformPosition.z(),
+                playerTransformRotation.pitch(),
+                playerTransformRotation.yaw(),
+                playerTransformRotation.roll()
         );
 
         plugin.getSpawnData().setSpawn(spawnData);
@@ -66,12 +65,12 @@ public class SetSpawnCommand extends AbstractCommand {
         // Must create new vector instances - Transform stores references, not copies.
         World world = Universe.get().getWorld(worldUUID);
         if (world != null) {
-            Vector3d spawnPosition = new Vector3d(
-                    playerTransformPosition.getX(),
-                    playerTransformPosition.getY(),
-                    playerTransformPosition.getZ()
+            org.joml.Vector3d spawnPosition = new org.joml.Vector3d(
+                    playerTransformPosition.x(),
+                    playerTransformPosition.y(),
+                    playerTransformPosition.z()
             );
-            Vector3f spawnRotation = new Vector3f(0, playerTransformRotation.getYaw(), 0);
+            Rotation3f spawnRotation = new Rotation3f(0, playerTransformRotation.yaw(), 0);
             Transform spawnTransform = new Transform(spawnPosition, spawnRotation);
             world.getWorldConfig().setSpawnProvider(new GlobalSpawnProvider(spawnTransform));
         }

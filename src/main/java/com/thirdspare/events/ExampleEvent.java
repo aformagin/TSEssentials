@@ -9,7 +9,7 @@ public class ExampleEvent {
 
     public static void onPlayerReady(PlayerReadyEvent event) {
         Player player = event.getPlayer();
-        player.sendMessage(Message.raw("Welcome " + player.getDisplayName()));
+        player.getPlayerRef().sendMessage(Message.raw("Welcome " + player.getPlayerRef().getUsername()));
     }
     //TODO On player join, check if they are a new player, if they are teleport them to spawn
     public static void onNewPlayerJoin(PlayerConnectEvent event) {

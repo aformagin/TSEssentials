@@ -1,7 +1,5 @@
 package com.thirdspare.utils;
 
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerConfigData;
 import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerRespawnPointData;
@@ -72,10 +70,10 @@ public class RespawnUtil {
      *
      * @param player    The player to get the respawn position for
      * @param worldName The world name to get the respawn position from
-     * @return The respawn position as Vector3d, or null if no respawn point set
+     * @return The respawn position, or null if no respawn point set
      */
     @Nullable
-    public static Vector3d getRespawnPosition(@Nonnull Player player, @Nonnull String worldName) {
+    public static org.joml.Vector3d getRespawnPosition(@Nonnull Player player, @Nonnull String worldName) {
         PlayerRespawnPointData respawnPoint = getPrimaryRespawnPoint(player, worldName);
         if (respawnPoint == null) {
             return null;
@@ -88,10 +86,10 @@ public class RespawnUtil {
      *
      * @param player    The player to get the block position for
      * @param worldName The world name to get the block position from
-     * @return The block position as Vector3i, or null if no respawn point set
+     * @return The block position, or null if no respawn point set
      */
     @Nullable
-    public static Vector3i getRespawnBlockPosition(@Nonnull Player player, @Nonnull String worldName) {
+    public static org.joml.Vector3i getRespawnBlockPosition(@Nonnull Player player, @Nonnull String worldName) {
         PlayerRespawnPointData respawnPoint = getPrimaryRespawnPoint(player, worldName);
         if (respawnPoint == null) {
             return null;
