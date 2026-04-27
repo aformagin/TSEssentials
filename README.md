@@ -2,13 +2,16 @@
 
 ## Overview
 
-TSEssentials is a foundational Hytale server plugin designed to provide essential teleportation features for players and server administrators. It includes commands for setting personal homes and creating server-wide warp points, making navigation across the game world seamless and efficient.
+TSEssentials is a foundational Hytale server plugin designed to provide essential teleportation features for players and server administrators. It includes personal homes, server-wide warps, a global spawn point, and a player-to-player teleport request (TPA) system, making navigation across the game world seamless and efficient.
 
 ## Features
 
 -   **Personal Homes:** Allows players to set one or more personal "home" locations that they can teleport back to at any time. The number of homes a player can set is configurable.
 -   **Server Warps:** Enables server administrators to create a network of server-wide warp points, facilitating easy travel to key locations like cities, dungeons, or event areas.
--   **Simple Commands:** Intuitive and easy-to-use commands for setting and using homes and warps.
+-   **Server Spawn:** A global spawn point that any player can teleport to.
+-   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
+-   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
+-   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
 -   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
 
 ## Commands
@@ -41,9 +44,31 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
     -   **Description:** Teleports a player to the server's global spawn point.
     -   **Usage:** `/spawn`.
 
+### Teleport Request (TPA) Commands
+
+-   `/tpa <player>`
+    -   **Description:** Sends a request to teleport to another player. The target player must accept the request before the teleport occurs.
+    -   **Usage:** `/tpa Steve`
+-   `/tpahere <player>`
+    -   **Description:** Sends a request for another player to teleport to you. The target player must accept the request before the teleport occurs.
+    -   **Usage:** `/tpahere Steve`
+-   `/tpaccept`
+    -   **Description:** Accepts the most recent pending teleport request.
+    -   **Usage:** `/tpaccept`
+-   `/tpdeny`
+    -   **Description:** Denies the most recent pending teleport request.
+    -   **Usage:** `/tpdeny`
+-   **Note:** Teleport requests expire after 120 seconds. Only one request per sender-target pair is active at a time; sending a new request replaces any existing one.
+
+### Admin Commands
+
+-   `/tphere <player>`
+    -   **Description:** Instantly teleports the specified player to your current location. No request or confirmation is needed.
+    -   **Usage:** `/tphere Steve`
+
 ## Configuration Files
 
-The plugin generates two main configuration files in the server's data directory.
+The plugin generates three configuration files in the server's data directory.
 
 ### `player_data.json`
 

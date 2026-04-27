@@ -1,14 +1,16 @@
 package com.thirdspare.commands;
 
-import com.hypixel.hytale.protocol.ItemWithAllMetadata;
-import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.math.vector.Transform;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.spawn.GlobalSpawnProvider;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.SpawnData;
+import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 
 import javax.annotation.Nonnull;
@@ -26,16 +28,8 @@ public class SetSpawnCommand extends AbstractCommand {
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext commandContext) {
-        if (!commandContext.isPlayer()) {
-            commandContext.sendMessage(Message.raw("This command can only be used by players!").color("#FF0000"));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        var playerUUID = commandContext.sender().getUuid();
-        var playerRef = Universe.get().getPlayer(playerUUID);
-
+        PlayerRef playerRef = CommandUtils.getPlayerFromContext(commandContext, true);
         if (playerRef == null) {
-            commandContext.sendMessage(Message.raw("Unable to find player!").color("#FF0000"));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -55,31 +49,36 @@ public class SetSpawnCommand extends AbstractCommand {
         // Save current location as spawn
         SpawnData spawnData = new SpawnData(
                 worldUUID.toString(),
-                playerTransformPosition.getX(),
-                playerTransformPosition.getY(),
-                playerTransformPosition.getZ(),
-                playerTransformRotation.getPitch(),
-                playerTransformRotation.getYaw(),
-                playerTransformRotation.getRoll()
+                playerTransformPosition.x(),
+                playerTransformPosition.y(),
+                playerTransformPosition.z(),
+                playerTransformRotation.pitch(),
+                playerTransformRotation.yaw(),
+                playerTransformRotation.roll()
         );
 
         plugin.getSpawnData().setSpawn(spawnData);
         plugin.saveSpawnData();
 
-        // Send the notification
-        var packetHandler = playerRef.getPacketHandler();
-        if (packetHandler != null) {
-            var primaryMessage = Message.raw("Success!").color("#00FF00");
-            var secondaryMessage = Message.raw("Server spawn has been " +
-                    (isUpdate ? "updated" : "set") + "!").color("#228B22");
-            var icon = new ItemStack(StaticVariables.SPAWN_ICON, 1).toPacket();
-
-            NotificationUtil.sendNotification(
-                    packetHandler,
-                    primaryMessage,
-                    secondaryMessage,
-                    (ItemWithAllMetadata) icon);
+        // Update the world's native spawn provider so new players, death respawns,
+        // and the map marker all use this location.
+        // Must create new vector instances - Transform stores references, not copies.
+        World world = Universe.get().getWorld(worldUUID);
+        if (world != null) {
+            org.joml.Vector3d spawnPosition = new org.joml.Vector3d(
+                    playerTransformPosition.x(),
+                    playerTransformPosition.y(),
+                    playerTransformPosition.z()
+            );
+            Rotation3f spawnRotation = new Rotation3f(0, playerTransformRotation.yaw(), 0);
+            Transform spawnTransform = new Transform(spawnPosition, spawnRotation);
+            world.getWorldConfig().setSpawnProvider(new GlobalSpawnProvider(spawnTransform));
         }
+
+        // Send the notification
+        CommandUtils.sendNotification(playerRef, "Success!", "#00FF00",
+                "Server spawn has been " + (isUpdate ? "updated" : "set") + "!", "#228B22",
+                StaticVariables.SPAWN_ICON);
 
         return CompletableFuture.completedFuture(null);
     }

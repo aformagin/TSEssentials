@@ -1,22 +1,18 @@
 package com.thirdspare.commands;
 
-import com.hypixel.hytale.protocol.ItemWithAllMetadata;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
-import com.hypixel.hytale.server.core.inventory.ItemStack;
-import com.hypixel.hytale.server.core.universe.Universe;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.PlayerHomeData;
+import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class HomeCommand extends AbstractCommand {
@@ -32,16 +28,8 @@ public class HomeCommand extends AbstractCommand {
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext commandContext) {
-        if (!commandContext.isPlayer()) {
-            commandContext.sendMessage(Message.raw("This command can only be used by players!").color("#FF0000"));
-            return CompletableFuture.completedFuture(null);
-        }
-
-        var playerUUID = commandContext.sender().getUuid();
-        var playerRef = Universe.get().getPlayer(playerUUID);
-
+        PlayerRef playerRef = CommandUtils.getPlayerFromContext(commandContext, true);
         if (playerRef == null) {
-            commandContext.sendMessage(Message.raw("Unable to find player!").color("#FF0000"));
             return CompletableFuture.completedFuture(null);
         }
 
@@ -49,23 +37,14 @@ public class HomeCommand extends AbstractCommand {
         String homeName = commandContext.get(homeNameArg);
 
         //Read home location from player_data
-        PlayerHomeData homeData = plugin.getPlayerData().getHome(playerUUID, homeName);
+        PlayerHomeData homeData = plugin.getPlayerData().getHome(playerRef.getUuid(), homeName);
 
         if (homeData == null) {
             // No home set - send error notification
-            var packetHandler = playerRef.getPacketHandler();
-            if (packetHandler != null) {
-                var primaryMessage = Message.raw("No Home Set!").color("#FF0000");
-                String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
-                var secondaryMessage = Message.raw("Home" + homeNameDisplay + " not found. Use /sethome" + homeNameDisplay + " to set it.").color("#FF6B6B");
-                var icon = new ItemStack(StaticVariables.HOME_ICON, 1).toPacket();
-
-                NotificationUtil.sendNotification(
-                        packetHandler,
-                        primaryMessage,
-                        secondaryMessage,
-                        (ItemWithAllMetadata) icon);
-            }
+            String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
+            CommandUtils.sendNotification(playerRef, "No Home Set!", "#FF0000",
+                    "Home" + homeNameDisplay + " not found. Use /sethome" + homeNameDisplay + " to set it.", "#FF6B6B",
+                    StaticVariables.HOME_ICON);
             return CompletableFuture.completedFuture(null);
         }
 
@@ -78,19 +57,10 @@ public class HomeCommand extends AbstractCommand {
         );
 
         // Send success notification
-        var packetHandler = playerRef.getPacketHandler();
-        if (packetHandler != null) {
-            var primaryMessage = Message.raw("Teleporting!").color("#00FF00");
-            String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " to '" + homeName + "'" : "";
-            var secondaryMessage = Message.raw("Welcome home" + homeNameDisplay + "!").color("#228B22");
-            var icon = new ItemStack(StaticVariables.HOME_ICON, 1).toPacket();
-
-            NotificationUtil.sendNotification(
-                    packetHandler,
-                    primaryMessage,
-                    secondaryMessage,
-                    (ItemWithAllMetadata) icon);
-        }
+        String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " to '" + homeName + "'" : "";
+        CommandUtils.sendNotification(playerRef, "Teleporting!", "#00FF00",
+                "Welcome home" + homeNameDisplay + "!", "#228B22",
+                StaticVariables.HOME_ICON);
 
         return CompletableFuture.completedFuture(null);
     }

@@ -3,8 +3,7 @@ package com.thirdspare.utils;
 import com.hypixel.hytale.builtin.beds.BedsPlugin;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerRespawnPointData;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -46,8 +45,8 @@ public class Teleportation {
             Store<EntityStore> store = playerRef.getReference().getStore();
 
             // Create position and rotation vectors
-            Vector3d position = new Vector3d(x, y, z);
-            Vector3f rotation = new Vector3f(pitch, yaw, roll);
+            org.joml.Vector3d position = new org.joml.Vector3d(x, y, z);
+            Rotation3f rotation = new Rotation3f(pitch, yaw, roll);
 
             // Create and apply teleport component
             Teleport teleport = new Teleport(position, rotation);
@@ -75,10 +74,10 @@ public class Teleportation {
             Store<EntityStore> store = playerRef.getReference().getStore();
 
             // Get current rotation to preserve it
-            Vector3f currentRotation = playerRef.getTransform().getRotation();
+            Rotation3f currentRotation = playerRef.getTransform().getRotation();
 
             // Create position vector
-            Vector3d position = new Vector3d(x, y, z);
+            org.joml.Vector3d position = new org.joml.Vector3d(x, y, z);
 
             // Create and apply teleport component
             Teleport teleport = new Teleport(position, currentRotation);
