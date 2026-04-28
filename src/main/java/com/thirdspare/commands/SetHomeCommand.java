@@ -36,48 +36,50 @@ public class SetHomeCommand extends AbstractCommand {
         // Get optional home name from command arguments
         String homeName = commandContext.get(homeNameArg);
 
-        // Check if player has reached max homes limit (only if setting a new home)
-        if (!plugin.getHomeService().hasHome(playerRef, homeName)) {
-            int currentHomes = plugin.getHomeService().getHomeCount(playerRef);
-            int maxHomes = plugin.getHomeService().getMaxHomes();
+        CommandUtils.runOnPlayerWorld(commandContext, playerRef, scheduledPlayer -> {
+            // Check if player has reached max homes limit (only if setting a new home)
+            if (!plugin.getHomeService().hasHome(scheduledPlayer, homeName)) {
+                int currentHomes = plugin.getHomeService().getHomeCount(scheduledPlayer);
+                int maxHomes = plugin.getHomeService().getMaxHomes();
 
-            if (currentHomes >= maxHomes) {
-                // Send error notification - home limit reached
-                CommandUtils.sendNotification(playerRef, "Home Limit Reached!", "#FF0000",
-                        "You can only have " + maxHomes + " home(s).", "#FF6B6B",
-                        StaticVariables.HOME_ICON);
-                return CompletableFuture.completedFuture(null);
+                if (currentHomes >= maxHomes) {
+                    // Send error notification - home limit reached
+                    CommandUtils.sendNotification(scheduledPlayer, "Home Limit Reached!", "#FF0000",
+                            "You can only have " + maxHomes + " home(s).", "#FF6B6B",
+                            StaticVariables.HOME_ICON);
+                    return;
+                }
             }
-        }
 
-        //Get the current location of the player
-        var worldUUID = playerRef.getWorldUuid();
+            // Get the current location of the player
+            var worldUUID = scheduledPlayer.getWorldUuid();
 
-        //These are needed to be saved
-        var playerTransformPosition = playerRef.getTransform().getPosition();
-        var playerTransformRotation = playerRef.getTransform().getRotation();
+            // These are needed to be saved
+            var playerTransformPosition = scheduledPlayer.getTransform().getPosition();
+            var playerTransformRotation = scheduledPlayer.getTransform().getRotation();
 
-        //UUID null should not be possible
-        if (worldUUID == null) return CompletableFuture.completedFuture(null);
+            // UUID null should not be possible
+            if (worldUUID == null) return;
 
-        // Save current location to the player's persistent ECS component.
-        PlayerHomeData homeData = new PlayerHomeData(
-                worldUUID.toString(),
-                playerTransformPosition.x(),
-                playerTransformPosition.y(),
-                playerTransformPosition.z(),
-                playerTransformRotation.pitch(),
-                playerTransformRotation.yaw(),
-                playerTransformRotation.roll()
-        );
+            // Save current location to the player's persistent ECS component.
+            PlayerHomeData homeData = new PlayerHomeData(
+                    worldUUID.toString(),
+                    playerTransformPosition.getX(),
+                    playerTransformPosition.getY(),
+                    playerTransformPosition.getZ(),
+                    playerTransformRotation.getPitch(),
+                    playerTransformRotation.getYaw(),
+                    playerTransformRotation.getRoll()
+            );
 
-        plugin.getHomeService().setHome(playerRef, homeName, homeData);
+            plugin.getHomeService().setHome(scheduledPlayer, homeName, homeData);
 
-        //Send the notification
-        String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
-        CommandUtils.sendNotification(playerRef, "Success!", "#00FF00",
-                "Your home" + homeNameDisplay + " has been set.", "#228B22",
-                StaticVariables.HOME_ICON);
+            // Send the notification
+            String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
+            CommandUtils.sendNotification(scheduledPlayer, "Success!", "#00FF00",
+                    "Your home" + homeNameDisplay + " has been set.", "#228B22",
+                    StaticVariables.HOME_ICON);
+        });
 
         return CompletableFuture.completedFuture(null);
     }

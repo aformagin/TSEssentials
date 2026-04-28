@@ -44,37 +44,39 @@ public class SetWarpCommand extends AbstractCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        // Get the current location of the player
-        var worldUUID = playerRef.getWorldUuid();
+        CommandUtils.runOnPlayerWorld(commandContext, playerRef, scheduledPlayer -> {
+            // Get the current location of the player
+            var worldUUID = scheduledPlayer.getWorldUuid();
 
-        // These are needed to be saved
-        var playerTransformPosition = playerRef.getTransform().getPosition();
-        var playerTransformRotation = playerRef.getTransform().getRotation();
+            // These are needed to be saved
+            var playerTransformPosition = scheduledPlayer.getTransform().getPosition();
+            var playerTransformRotation = scheduledPlayer.getTransform().getRotation();
 
-        // UUID null should not be possible
-        if (worldUUID == null) return CompletableFuture.completedFuture(null);
+            // UUID null should not be possible
+            if (worldUUID == null) return;
 
-        // Check if warp already exists
-        boolean isUpdate = plugin.getWarpData().hasWarp(warpName);
+            // Check if warp already exists
+            boolean isUpdate = plugin.getWarpData().hasWarp(warpName);
 
-        // Save current location to warp data file
-        WarpData warpData = new WarpData(
-                worldUUID.toString(),
-                playerTransformPosition.x(),
-                playerTransformPosition.y(),
-                playerTransformPosition.z(),
-                playerTransformRotation.pitch(),
-                playerTransformRotation.yaw(),
-                playerTransformRotation.roll()
-        );
+            // Save current location to warp data file
+            WarpData warpData = new WarpData(
+                    worldUUID.toString(),
+                    playerTransformPosition.getX(),
+                    playerTransformPosition.getY(),
+                    playerTransformPosition.getZ(),
+                    playerTransformRotation.getPitch(),
+                    playerTransformRotation.getYaw(),
+                    playerTransformRotation.getRoll()
+            );
 
-        plugin.getWarpData().setWarp(warpName, warpData);
-        plugin.saveWarpData();
+            plugin.getWarpData().setWarp(warpName, warpData);
+            plugin.saveWarpData();
 
-        // Send the notification
-        CommandUtils.sendNotification(playerRef, "Success!", "#00FF00",
-                "Warp '" + warpName + "' has been " + (isUpdate ? "updated" : "created") + ".", "#228B22",
-                StaticVariables.WARP_ICON);
+            // Send the notification
+            CommandUtils.sendNotification(scheduledPlayer, "Success!", "#00FF00",
+                    "Warp '" + warpName + "' has been " + (isUpdate ? "updated" : "created") + ".", "#228B22",
+                    StaticVariables.WARP_ICON);
+        });
 
         return CompletableFuture.completedFuture(null);
     }

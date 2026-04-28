@@ -18,6 +18,9 @@ public class HomeService {
         this.homesComponentType = homesComponentType;
     }
 
+    /**
+     * Must be called from the player's owning world thread.
+     */
     public PlayerHomesComponent getHomes(PlayerRef player) {
         Ref<EntityStore> ref = player.getReference();
         Store<EntityStore> store = ref.getStore();

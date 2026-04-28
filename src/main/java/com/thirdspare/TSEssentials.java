@@ -28,6 +28,8 @@ import javax.annotation.Nonnull;
 import java.util.logging.Level;
 
 public class TSEssentials extends JavaPlugin {
+    // TODO: When updating to Hytale 2026.04+, replace deprecated Vector3d/Vector3f API usage
+    // with the newer vector/transform API expected by that server version.
 
     /* Player data configuration with codec-based JSON persistence */
     private final Config<PlayerDataConfig> playerDataConfig = withConfig("player_data", PlayerDataConfig.CODEC);

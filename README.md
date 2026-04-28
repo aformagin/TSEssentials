@@ -14,6 +14,7 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Nicknames:** Allows players to set custom display names with color support.
 -   **Economy & Shops (Planned):** Digital currency system and player-run marketplaces.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
+-   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
 -   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
 -   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
 -   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
