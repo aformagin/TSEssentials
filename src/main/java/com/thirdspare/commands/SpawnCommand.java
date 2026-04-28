@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.SpawnData;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -18,6 +19,7 @@ public class SpawnCommand extends AbstractCommand {
 
     public SpawnCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.SPAWN);
         this.plugin = plugin;
     }
 

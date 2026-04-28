@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.chat.ChatService;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.PlayerLookup;
 
@@ -20,6 +21,7 @@ public class IgnoreCommand extends AbstractCommand {
 
     public IgnoreCommand(String name, String description, boolean ignore, ChatService chatService) {
         super(name, description);
+        requirePermission(ignore ? TSEssentialsPermissions.IGNORE : TSEssentialsPermissions.UNIGNORE);
         this.chatService = chatService;
         this.ignore = ignore;
         this.usernameArg = withRequiredArg("player", "Player name", ArgTypes.STRING);

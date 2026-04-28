@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.PlayerLookup;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -26,6 +27,7 @@ public class TpHereCommand extends AbstractCommand {
 
     public TpHereCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.TP_HERE);
         this.plugin = plugin;
         this.usernameArg = withRequiredArg("username", "Player to teleport to you", ArgTypes.STRING);
     }

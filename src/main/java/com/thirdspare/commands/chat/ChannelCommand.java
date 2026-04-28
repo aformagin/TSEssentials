@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.chat.ChatService;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -16,6 +17,7 @@ public class ChannelCommand extends AbstractCommand {
 
     public ChannelCommand(ChatService chatService) {
         super("channel", "Manage chat channel subscriptions");
+        requirePermission(TSEssentialsPermissions.CHANNEL);
         this.chatService = chatService;
         addAliases("ch");
         addSubCommand(new ListSubCommand(chatService));
@@ -40,6 +42,7 @@ public class ChannelCommand extends AbstractCommand {
 
         private ListSubCommand(ChatService chatService) {
             super("list", "List available chat channels");
+            requirePermission(TSEssentialsPermissions.CHANNEL_LIST);
             this.chatService = chatService;
         }
 
@@ -59,6 +62,7 @@ public class ChannelCommand extends AbstractCommand {
 
         private FocusSubCommand(ChatService chatService) {
             super("focus", "Set your active chat channel");
+            requirePermission(TSEssentialsPermissions.CHANNEL_FOCUS);
             this.chatService = chatService;
             this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
         }
@@ -79,6 +83,7 @@ public class ChannelCommand extends AbstractCommand {
 
         private JoinSubCommand(ChatService chatService) {
             super("join", "Subscribe to a chat channel");
+            requirePermission(TSEssentialsPermissions.CHANNEL_JOIN);
             this.chatService = chatService;
             this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
         }
@@ -99,6 +104,7 @@ public class ChannelCommand extends AbstractCommand {
 
         private LeaveSubCommand(ChatService chatService) {
             super("leave", "Unsubscribe from a chat channel");
+            requirePermission(TSEssentialsPermissions.CHANNEL_LEAVE);
             this.chatService = chatService;
             this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
         }

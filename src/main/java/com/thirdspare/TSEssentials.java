@@ -21,6 +21,7 @@ import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.events.chat.ChatListener;
 import com.thirdspare.homes.HomeService;
 import com.thirdspare.homes.PlayerHomesComponent;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequestManager;
 
 import javax.annotation.Nonnull;
@@ -87,6 +88,8 @@ public class TSEssentials extends JavaPlugin {
         channelManager = new ChannelManager(chatChannelConfig, chatChannelData);
         chatService = new ChatService(channelManager, playerChatSettingsComponentType);
         this.getLogger().at(Level.INFO).log("Loaded " + channelManager.getChannels().size() + " chat channels");
+        this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
+                TSEssentialsPermissions.COMMAND_WILDCARD);
 
         /* Initialize TPA request manager */
         teleportRequestManager = new TeleportRequestManager();

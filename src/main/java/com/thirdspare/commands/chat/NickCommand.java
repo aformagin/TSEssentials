@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.chat.ChatService;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -17,6 +18,7 @@ public class NickCommand extends AbstractCommand {
 
     public NickCommand(ChatService chatService) {
         super("nick", "Set or clear your chat nickname");
+        requirePermission(TSEssentialsPermissions.NICK);
         this.chatService = chatService;
         this.nicknameArg = withRequiredArg("nickname", "Nickname or off", ArgTypes.GREEDY_STRING);
     }

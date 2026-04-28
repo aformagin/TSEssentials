@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.WarpData;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -21,6 +22,7 @@ public class WarpCommand extends AbstractCommand {
 
     public WarpCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.WARP);
         this.plugin = plugin;
         this.warpNameArg = withRequiredArg("warp-name", "Name of the warp", ArgTypes.STRING);
     }

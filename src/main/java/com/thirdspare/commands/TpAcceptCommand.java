@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequest;
 import com.thirdspare.tpa.TeleportRequestType;
 import com.thirdspare.utils.StaticVariables;
@@ -23,6 +24,7 @@ public class TpAcceptCommand extends AbstractCommand {
 
     public TpAcceptCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.TP_ACCEPT);
         this.plugin = plugin;
     }
 

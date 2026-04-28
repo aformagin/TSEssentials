@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.chat.ChannelManager;
 import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.ui.ChatEditPage;
 import com.thirdspare.utils.CommandUtils;
 
@@ -20,7 +21,6 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
 public class ChatEditCommand extends AbstractCommand {
-    private static final String ADMIN_PERMISSION = "tsessentials.chat.admin";
     private final ChannelManager channelManager;
     private final OptionalArg<String> actionArg;
     private final OptionalArg<String> channelArg;
@@ -31,7 +31,7 @@ public class ChatEditCommand extends AbstractCommand {
     public ChatEditCommand(ChannelManager channelManager) {
         super("chatedit", "Edit chat channels");
         this.channelManager = channelManager;
-        requirePermission(ADMIN_PERMISSION);
+        requirePermission(TSEssentialsPermissions.CHAT_EDIT);
         this.actionArg = withOptionalArg("action", "list, create, delete, prefix, color, range, permission, default", ArgTypes.STRING);
         this.channelArg = withOptionalArg("channel", "Channel name", ArgTypes.STRING);
         this.valueArg = withOptionalArg("value", "Value", ArgTypes.STRING);

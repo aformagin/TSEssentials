@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequest;
 import com.thirdspare.utils.StaticVariables;
 
@@ -21,6 +22,7 @@ public class TpDenyCommand extends AbstractCommand {
 
     public TpDenyCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.TP_DENY);
         this.plugin = plugin;
     }
 

@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.chat.ChatService;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -18,6 +19,7 @@ public class ChannelMessageCommand extends AbstractCommand {
 
     public ChannelMessageCommand(String command, String description, String channelName, ChatService chatService) {
         super(command, description);
+        requirePermission(TSEssentialsPermissions.shortcut(command));
         this.chatService = chatService;
         this.channelName = channelName;
         this.messageArg = withRequiredArg("message", "Message to send", ArgTypes.GREEDY_STRING);

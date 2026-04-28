@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.spawn.GlobalSpawnProvider;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.SpawnData;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 
@@ -22,6 +23,7 @@ public class SetSpawnCommand extends AbstractCommand {
 
     public SetSpawnCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.SET_SPAWN);
         this.plugin = plugin;
     }
 

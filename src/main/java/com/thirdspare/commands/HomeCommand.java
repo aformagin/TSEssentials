@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
 import com.thirdspare.data.PlayerHomeData;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -21,6 +22,7 @@ public class HomeCommand extends AbstractCommand {
 
     public HomeCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.HOME);
         this.plugin = plugin;
         this.homeNameArg = withOptionalArg("home-name", "Name of the home", ArgTypes.STRING);
     }
