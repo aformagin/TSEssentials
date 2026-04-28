@@ -12,7 +12,9 @@ import com.thirdspare.data.chat.ChatChannel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -125,7 +127,7 @@ public class ChatService {
             return;
         }
 
-        List<PlayerRef> recipients = filterRecipients(sender, Universe.get().getPlayers(), channel);
+        List<PlayerRef> recipients = filterRecipients(sender, getOnlinePlayers(sender), channel);
         Message message = format(channel, sender, content);
         for (PlayerRef recipient : recipients) {
             recipient.sendMessage(message);
@@ -302,11 +304,14 @@ public class ChatService {
         if (senderWorld == null || targetWorld == null || !senderWorld.equals(targetWorld)) {
             return false;
         }
-        var senderPosition = sender.getTransform().getPosition();
-        var targetPosition = target.getTransform().getPosition();
-        double dx = senderPosition.x() - targetPosition.x();
-        double dy = senderPosition.y() - targetPosition.y();
-        double dz = senderPosition.z() - targetPosition.z();
+        Object senderPosition = getPosition(sender);
+        Object targetPosition = getPosition(target);
+        if (senderPosition == null || targetPosition == null) {
+            return false;
+        }
+        double dx = getCoordinate(senderPosition, "x") - getCoordinate(targetPosition, "x");
+        double dy = getCoordinate(senderPosition, "y") - getCoordinate(targetPosition, "y");
+        double dz = getCoordinate(senderPosition, "z") - getCoordinate(targetPosition, "z");
         return (dx * dx) + (dy * dy) + (dz * dz) <= channel.getRange() * channel.getRange();
     }
 
@@ -376,5 +381,65 @@ public class ChatService {
                 return false;
             }
         }
+    }
+
+    private Collection<PlayerRef> getOnlinePlayers(PlayerRef sender) {
+        try {
+            Object players = Universe.get().getClass()
+                    .getMethod("getPlayers")
+                    .invoke(Universe.get());
+            if (players instanceof Collection<?> collection) {
+                return playerRefsFrom(collection);
+            }
+            if (players instanceof Map<?, ?> map) {
+                return playerRefsFrom(map.values());
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Older Hytale builds changed Universe#getPlayers' return descriptor.
+        }
+        return Collections.singletonList(sender);
+    }
+
+    private Collection<PlayerRef> playerRefsFrom(Collection<?> values) {
+        List<PlayerRef> players = new ArrayList<>();
+        for (Object value : values) {
+            if (value instanceof PlayerRef player) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    private Object getPosition(PlayerRef player) {
+        try {
+            Object transform = player.getTransform();
+            return transform.getClass()
+                    .getMethod("getPosition")
+                    .invoke(transform);
+        } catch (ReflectiveOperationException ignored) {
+            return null;
+        }
+    }
+
+    private double getCoordinate(Object position, String axis) {
+        try {
+            Object value = position.getClass().getField(axis).get(position);
+            if (value instanceof Number number) {
+                return number.doubleValue();
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Some vector classes expose coordinates as methods instead of fields.
+        }
+
+        try {
+            Object value = position.getClass().getMethod(axis).invoke(position);
+            if (value instanceof Number number) {
+                return number.doubleValue();
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Missing coordinate data should keep the recipient out of range.
+        }
+
+        return Double.NaN;
     }
 }

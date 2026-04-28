@@ -8,6 +8,8 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.chat.ChannelManager;
 import com.thirdspare.data.chat.ChatChannel;
@@ -88,12 +90,25 @@ public class ChatEditCommand extends AbstractCommand {
         if (player == null) {
             return;
         }
-        var ref = player.getReference();
-        var store = ref.getStore();
-        Player playerComponent = store.getComponent(ref, Player.getComponentType());
-        if (playerComponent != null) {
-            playerComponent.getPageManager().openCustomPage(ref, store, new ChatEditPage(player, channelManager));
+        World world = Universe.get().getWorld(player.getWorldUuid());
+        if (world == null) {
+            return;
         }
+        world.execute(() -> {
+            if (!player.isValid()) {
+                return;
+            }
+            try {
+                var ref = player.getReference();
+                var store = ref.getStore();
+                Player playerComponent = store.getComponent(ref, Player.getComponentType());
+                if (playerComponent != null) {
+                    playerComponent.getPageManager().openCustomPage(ref, store, new ChatEditPage(player, channelManager));
+                }
+            } catch (IllegalStateException ignored) {
+                // The player can leave before the queued UI open runs.
+            }
+        });
     }
 
     private String create(String channel, String prefix, String color, String rangeValue) {
