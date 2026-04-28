@@ -1,0 +1,164 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+@SectionTitle = Label {
+  Anchor: (Height: 26, Bottom: 8);
+  Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #f1ba50, VerticalAlignment: Center);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #ChatEditPanel {
+    Anchor: (Width: 1120, Height: 720);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "TSChat Channels";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 410, Height: 34);
+        Padding: (Horizontal: 10);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      LayoutMode: Left;
+
+      Group #LeftPane {
+        Anchor: (Width: 340);
+        Background: #252525(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 14);
+
+        @SectionTitle { Text: "Channels"; }
+
+        Group #ChannelList {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Padding: (Right: 6);
+
+          $C.@TextButton #ChannelRow0 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow1 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow2 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow3 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow4 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow5 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow6 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow7 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow8 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ChannelRow9 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+        }
+
+        $C.@TextButton #AddButton {
+          @Anchor = (Top: 12, Height: 38);
+          Text: "+ Add Channel";
+        }
+      }
+
+      Group #RightPane {
+        FlexWeight: 1;
+        Background: #414141(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 22);
+
+        Label #SelectedTitle {
+          Anchor: (Height: 38, Bottom: 18);
+          Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "global";
+        }
+
+        Group #Form {
+          LayoutMode: Top;
+          FlexWeight: 1;
+          Padding: (Right: 10);
+
+          @FieldLabel { Text: "Name"; }
+          $C.@TextField #NameInput { @Anchor = (Height: 38, Bottom: 12); }
+
+          @FieldLabel { Text: "Prefix"; }
+          $C.@TextField #PrefixInput { @Anchor = (Height: 38, Bottom: 12); }
+
+          @FieldLabel { Text: "Colour"; }
+          $C.@DropdownBox #ColorDropdown {
+            @Anchor = (Height: 38, Bottom: 12);
+            ShowSearchInput: false;
+            MaxSelection: 1;
+          }
+
+          @FieldLabel { Text: "Access Permission"; }
+          $C.@TextField #PermissionInput { @Anchor = (Height: 38, Bottom: 12); }
+
+          Group #RangeRow {
+            Anchor: (Height: 38, Bottom: 12);
+            LayoutMode: Left;
+
+            $C.@CheckBox #RangedCheck {
+              Anchor: (Width: 24, Height: 24, Right: 10);
+            }
+
+            Label {
+              FlexWeight: 1;
+              Text: "Range limited";
+              Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center);
+            }
+          }
+
+          @FieldLabel { Text: "Range"; }
+          $C.@NumberField #RangeInput { @Anchor = (Height: 38, Bottom: 12); }
+
+          Group #DefaultRow {
+            Anchor: (Height: 38, Bottom: 12);
+            LayoutMode: Left;
+
+            $C.@CheckBox #DefaultSubCheck {
+              Anchor: (Width: 24, Height: 24, Right: 10);
+            }
+
+            Label {
+              FlexWeight: 1;
+              Text: "Subscribe new players by default";
+              Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center);
+            }
+          }
+        }
+
+        Group #Actions {
+          Anchor: (Height: 46, Top: 16);
+          LayoutMode: Right;
+
+          $C.@TextButton #SaveButton {
+            @Anchor = (Width: 150, Right: 8);
+            Text: "Save";
+          }
+
+          $C.@CancelTextButton #DeleteButton {
+            @Anchor = (Width: 150);
+            Text: "Delete";
+          }
+        }
+      }
+    }
+  }
+}

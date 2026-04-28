@@ -3,7 +3,7 @@ package com.thirdspare.data;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.codec.codecs.map.ObjectMapCodec;
+import com.hypixel.hytale.codec.codecs.map.MapCodec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +111,25 @@ public class PlayerDataConfig {
     }
 
     /**
+     * Get legacy homes for a player keyed by ECS home name.
+     * This supports one-time migration into PlayerHomesComponent.
+     *
+     * @param playerUUID The player's UUID
+     * @return Map of normalized home names to home data
+     */
+    public Map<String, PlayerHomeData> getHomes(UUID playerUUID) {
+        Map<String, PlayerHomeData> homes = new HashMap<>();
+        String uuidPrefix = playerUUID.toString() + ":";
+        playerHomes.forEach((key, value) -> {
+            if (key.startsWith(uuidPrefix)) {
+                String homeName = key.substring(uuidPrefix.length());
+                homes.put(homeName == null || homeName.isBlank() ? "default" : homeName.toLowerCase(), value);
+            }
+        });
+        return homes;
+    }
+
+    /**
      * Get the maximum number of homes allowed per player
      * @return The max homes limit
      */
@@ -147,11 +166,9 @@ public class PlayerDataConfig {
                     (config, val) -> config.maxHomes = val,
                     config -> config.maxHomes).add()
             .append(new KeyedCodec<>("PlayerHomes",
-                    new ObjectMapCodec<>(
+                    new MapCodec<>(
                             PlayerHomeData.CODEC,
-                            HashMap::new,
-                            key -> key,  // String -> String (no conversion needed)
-                            str -> str   // String -> String (no conversion needed)
+                            HashMap::new
                     )),
                     (config, val) -> config.playerHomes = val != null ? new HashMap<>(val) : new HashMap<>(),
                     config -> config.playerHomes).add()

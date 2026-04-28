@@ -9,8 +9,10 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequest;
 import com.thirdspare.tpa.TeleportRequestType;
+import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
 
@@ -23,6 +25,7 @@ public class TpAcceptCommand extends AbstractCommand {
 
     public TpAcceptCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.TP_ACCEPT);
         this.plugin = plugin;
     }
 
@@ -78,26 +81,38 @@ public class TpAcceptCommand extends AbstractCommand {
             destinationPlayer = requesterRef;
         }
 
-        // Get destination player's position
-        var destTransform = destinationPlayer.getTransform();
+        CommandUtils.runOnPlayerWorld(commandContext, destinationPlayer, scheduledDestination -> {
+            if (!teleportingPlayer.isValid()) {
+                plugin.getTeleportRequestManager().removeRequest(request);
+                sendNotification(playerRef, "Player Offline", "The teleporting player is no longer online", "#FF0000", "#FF6B6B");
+                return;
+            }
 
-        var destWorldUUID = destinationPlayer.getWorldUuid();
+            // Get destination player's position
+            var destTransform = scheduledDestination.getTransform();
+            var destWorldUUID = scheduledDestination.getWorldUuid();
 
-        // Execute teleport
-        Teleportation.teleportPlayer(
-                teleportingPlayer,
-                destTransform.getPosition().x,
-                destTransform.getPosition().y,
-                destTransform.getPosition().z,
-                destWorldUUID
-        );
+            if (destWorldUUID == null) {
+                sendNotification(playerRef, "Teleport Failed", "The destination world is unavailable", "#FF0000", "#FF6B6B");
+                return;
+            }
 
-        // Remove the request
-        plugin.getTeleportRequestManager().removeRequest(request);
+            // Execute teleport
+            Teleportation.teleportPlayer(
+                    teleportingPlayer,
+                    destTransform.getPosition().getX(),
+                    destTransform.getPosition().getY(),
+                    destTransform.getPosition().getZ(),
+                    destWorldUUID
+            );
 
-        // Notify both players
-        sendNotification(playerRef, "Request Accepted", "Teleport request accepted!", "#00FF00", "#228B22");
-        sendNotification(requesterRef, "Request Accepted", playerRef.getUsername() + " accepted your teleport request!", "#00FF00", "#228B22");
+            // Remove the request
+            plugin.getTeleportRequestManager().removeRequest(request);
+
+            // Notify both players
+            sendNotification(playerRef, "Request Accepted", "Teleport request accepted!", "#00FF00", "#228B22");
+            sendNotification(requesterRef, "Request Accepted", playerRef.getUsername() + " accepted your teleport request!", "#00FF00", "#228B22");
+        });
 
         return CompletableFuture.completedFuture(null);
     }

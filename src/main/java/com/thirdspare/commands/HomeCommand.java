@@ -6,7 +6,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.TSEssentials;
-import com.thirdspare.data.PlayerHomeData;
+import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -21,6 +21,7 @@ public class HomeCommand extends AbstractCommand {
 
     public HomeCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.HOME);
         this.plugin = plugin;
         this.homeNameArg = withOptionalArg("home-name", "Name of the home", ArgTypes.STRING);
     }
@@ -36,31 +37,33 @@ public class HomeCommand extends AbstractCommand {
         // Get optional home name from command arguments
         String homeName = commandContext.get(homeNameArg);
 
-        //Read home location from player_data
-        PlayerHomeData homeData = plugin.getPlayerData().getHome(playerRef.getUuid(), homeName);
+        CommandUtils.runOnPlayerWorld(commandContext, playerRef, scheduledPlayer -> {
+            // Read home location from the player's persistent ECS component.
+            var homeData = plugin.getHomeService().getHome(scheduledPlayer, homeName);
 
-        if (homeData == null) {
-            // No home set - send error notification
-            String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
-            CommandUtils.sendNotification(playerRef, "No Home Set!", "#FF0000",
-                    "Home" + homeNameDisplay + " not found. Use /sethome" + homeNameDisplay + " to set it.", "#FF6B6B",
+            if (homeData == null) {
+                // No home set - send error notification
+                String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";
+                CommandUtils.sendNotification(scheduledPlayer, "No Home Set!", "#FF0000",
+                        "Home" + homeNameDisplay + " not found. Use /sethome" + homeNameDisplay + " to set it.", "#FF6B6B",
+                        StaticVariables.HOME_ICON);
+                return;
+            }
+
+            // Teleport the player to the home location
+            Teleportation.teleportPlayer(
+                    scheduledPlayer,
+                    homeData.getX(), homeData.getY(), homeData.getZ(),
+                    homeData.getPitch(), homeData.getYaw(), homeData.getRoll(),
+                    homeData.getWorldUUID()
+            );
+
+            // Send success notification
+            String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " to '" + homeName + "'" : "";
+            CommandUtils.sendNotification(scheduledPlayer, "Teleporting!", "#00FF00",
+                    "Welcome home" + homeNameDisplay + "!", "#228B22",
                     StaticVariables.HOME_ICON);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        //Teleport the player to the home location
-        Teleportation.teleportPlayer(
-                playerRef,
-                homeData.getX(), homeData.getY(), homeData.getZ(),
-                homeData.getPitch(), homeData.getYaw(), homeData.getRoll(),
-                homeData.getWorldUUID()
-        );
-
-        // Send success notification
-        String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " to '" + homeName + "'" : "";
-        CommandUtils.sendNotification(playerRef, "Teleporting!", "#00FF00",
-                "Welcome home" + homeNameDisplay + "!", "#228B22",
-                StaticVariables.HOME_ICON);
+        });
 
         return CompletableFuture.completedFuture(null);
     }

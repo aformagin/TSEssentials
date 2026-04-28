@@ -6,10 +6,12 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class CommandUtils {
 
@@ -48,5 +50,27 @@ public class CommandUtils {
                     (ItemWithAllMetadata) itemStack.toPacket()
             );
         }
+    }
+
+    public static boolean runOnPlayerWorld(CommandContext commandContext, PlayerRef playerRef, Consumer<PlayerRef> task) {
+        UUID worldUUID = playerRef.getWorldUuid();
+        if (worldUUID == null) {
+            commandContext.sendMessage(Message.raw("Unable to find your current world.").color("#FF0000"));
+            return false;
+        }
+
+        World world = Universe.get().getWorld(worldUUID);
+        if (world == null) {
+            commandContext.sendMessage(Message.raw("Unable to access your current world.").color("#FF0000"));
+            return false;
+        }
+
+        world.execute(() -> {
+            if (!playerRef.isValid()) {
+                return;
+            }
+            task.accept(playerRef);
+        });
+        return true;
     }
 }

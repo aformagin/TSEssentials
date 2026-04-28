@@ -11,6 +11,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.thirdspare.TSEssentials;
+import com.thirdspare.permissions.TSEssentialsPermissions;
+import com.thirdspare.utils.CommandUtils;
 import com.thirdspare.utils.PlayerLookup;
 import com.thirdspare.utils.StaticVariables;
 import com.thirdspare.utils.Teleportation;
@@ -26,6 +28,7 @@ public class TpHereCommand extends AbstractCommand {
 
     public TpHereCommand(@Nullable String name, @Nullable String description, TSEssentials plugin) {
         super(name, description);
+        requirePermission(TSEssentialsPermissions.TP_HERE);
         this.plugin = plugin;
         this.usernameArg = withRequiredArg("username", "Player to teleport to you", ArgTypes.STRING);
     }
@@ -61,24 +64,31 @@ public class TpHereCommand extends AbstractCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        // Get admin's position
-        var adminTransform = playerRef.getTransform();
-        var adminWorldUUID = playerRef.getWorldUuid();
+        CommandUtils.runOnPlayerWorld(commandContext, playerRef, scheduledPlayer -> {
+            if (!targetRef.isValid()) {
+                sendNotification(scheduledPlayer, "Player Offline", "The target player is no longer online", "#FF0000", "#FF6B6B");
+                return;
+            }
 
-        // Teleport target to admin immediately (no request needed - admin command)
-        Teleportation.teleportPlayer(
-                targetRef,
-                adminTransform.getPosition().x,
-                adminTransform.getPosition().y,
-                adminTransform.getPosition().z,
-                adminWorldUUID
-        );
+            // Get admin's position
+            var adminTransform = scheduledPlayer.getTransform();
+            var adminWorldUUID = scheduledPlayer.getWorldUuid();
 
-        // Notify admin
-        sendNotification(playerRef, "Teleporting Player", "Teleporting " + targetRef.getUsername() + " to your location", "#00FF00", "#228B22");
+            // Teleport target to admin immediately (no request needed - admin command)
+            Teleportation.teleportPlayer(
+                    targetRef,
+                    adminTransform.getPosition().getX(),
+                    adminTransform.getPosition().getY(),
+                    adminTransform.getPosition().getZ(),
+                    adminWorldUUID
+            );
 
-        // Notify target
-        sendNotification(targetRef, "Teleported", "You have been teleported to " + playerRef.getUsername(), "#FFD700", "#FFA500");
+            // Notify admin
+            sendNotification(scheduledPlayer, "Teleporting Player", "Teleporting " + targetRef.getUsername() + " to your location", "#00FF00", "#228B22");
+
+            // Notify target
+            sendNotification(targetRef, "Teleported", "You have been teleported to " + scheduledPlayer.getUsername(), "#FFD700", "#FFA500");
+        });
 
         return CompletableFuture.completedFuture(null);
     }
