@@ -96,6 +96,18 @@ Detailed planning and design documents for upcoming features can be found in the
     -   **Description:** Instantly teleports the specified player to your current location. No request or confirmation is needed.
     -   **Usage:** `/tphere Steve`
 
+### Chat Admin Commands
+
+-   `/chadmin create <name> [prefix] [color]`
+    -   **Description:** Creates a new chat channel.
+    -   **Usage:** `/chadmin create trade [&aTRADE] green`
+-   `/chadmin delete <name>`
+    -   **Description:** Deletes a chat channel.
+    -   **Usage:** `/chadmin delete trade`
+-   `/chadmin set <name> <property> <value>`
+    -   **Description:** Modifies a property of a channel, such as making it ranged.
+    -   **Usage:** `/chadmin set local range 100`
+
 ## Configuration Files
 
 The plugin generates three configuration files in the server's data directory.

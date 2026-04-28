@@ -3,6 +3,7 @@ package com.thirdspare;
 import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerRespawnPointData;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerInteractEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -11,14 +12,19 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.chat.ChannelManager;
 import com.thirdspare.chat.ChatService;
 import com.thirdspare.chat.PlayerChatSettingsComponent;
+import com.thirdspare.claims.ClaimManager;
 import com.thirdspare.commands.*;
+import com.thirdspare.commands.claims.ClaimCommand;
 import com.thirdspare.commands.chat.*;
 import com.thirdspare.data.chat.ChatChannelConfig;
+import com.thirdspare.data.claims.ClaimsConfig;
 import com.thirdspare.data.PlayerDataConfig;
 import com.thirdspare.data.SpawnConfig;
 import com.thirdspare.data.WarpConfig;
 import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.events.chat.ChatListener;
+import com.thirdspare.events.claims.ClaimProtectionListener;
+import com.thirdspare.events.claims.ClaimProtectionSystems;
 import com.thirdspare.homes.HomeService;
 import com.thirdspare.homes.PlayerHomesComponent;
 import com.thirdspare.tpa.TeleportRequestManager;
@@ -40,14 +46,19 @@ public class TSEssentials extends JavaPlugin {
     /* Chat channel configuration with codec-based JSON persistence */
     private final Config<ChatChannelConfig> chatChannelConfig = withConfig("chat_channels", ChatChannelConfig.CODEC);
 
+    /* Claim data configuration with codec-based JSON persistence */
+    private final Config<ClaimsConfig> claimsDataConfig = withConfig("claims_data", ClaimsConfig.CODEC);
+
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
     private SpawnConfig spawnData;
     private ChatChannelConfig chatChannelData;
+    private ClaimsConfig claimsData;
     private ComponentType<EntityStore, PlayerChatSettingsComponent> playerChatSettingsComponentType;
     private ComponentType<EntityStore, PlayerHomesComponent> playerHomesComponentType;
     private ChannelManager channelManager;
     private ChatService chatService;
+    private ClaimManager claimManager;
     private HomeService homeService;
     private TeleportRequestManager teleportRequestManager;
 
@@ -88,6 +99,10 @@ public class TSEssentials extends JavaPlugin {
         chatService = new ChatService(channelManager, playerChatSettingsComponentType);
         this.getLogger().at(Level.INFO).log("Loaded " + channelManager.getChannels().size() + " chat channels");
 
+        claimsData = claimsDataConfig.get();
+        claimManager = new ClaimManager(claimsDataConfig, claimsData);
+        this.getLogger().at(Level.INFO).log("Loaded " + claimsData.getClaimCount() + " claims");
+
         /* Initialize TPA request manager */
         teleportRequestManager = new TeleportRequestManager();
 
@@ -116,6 +131,7 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new NickCommand(chatService));
         this.getCommandRegistry().registerCommand(new NickColorCommand(chatService));
         this.getCommandRegistry().registerCommand(new ChatEditCommand(channelManager));
+        this.getCommandRegistry().registerCommand(new ClaimCommand(claimManager));
 
         /* Event Registry */
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
@@ -123,6 +139,13 @@ public class TSEssentials extends JavaPlugin {
             chatService.loadSettings(event.getPlayer().getPlayerRef());
         });
         this.getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener(chatService)::onPlayerChat);
+        this.getEventRegistry().registerGlobal(PlayerInteractEvent.class, new ClaimProtectionListener(claimManager)::onPlayerInteract);
+
+        /* ECS protection systems */
+        this.getEntityStoreRegistry().registerSystem(new ClaimProtectionSystems.BreakBlockSystem(claimManager));
+        this.getEntityStoreRegistry().registerSystem(new ClaimProtectionSystems.DamageBlockSystem(claimManager));
+        this.getEntityStoreRegistry().registerSystem(new ClaimProtectionSystems.PlaceBlockSystem(claimManager));
+        this.getEntityStoreRegistry().registerSystem(new ClaimProtectionSystems.UseBlockPreSystem(claimManager));
     }
 
     /**
@@ -198,6 +221,10 @@ public class TSEssentials extends JavaPlugin {
 
     public ChatService getChatService() {
         return chatService;
+    }
+
+    public ClaimManager getClaimManager() {
+        return claimManager;
     }
 
     public ComponentType<EntityStore, PlayerChatSettingsComponent> getPlayerChatSettingsComponentType() {
