@@ -1,9 +1,8 @@
 package com.thirdspare.data;
 
-import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.codec.codecs.map.ObjectMapCodec;
+import com.hypixel.hytale.codec.codecs.map.MapCodec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,12 +105,10 @@ public class WarpConfig {
      */
     public static final BuilderCodec<WarpConfig> CODEC = BuilderCodec.builder(WarpConfig.class, WarpConfig::new)
             .append(new KeyedCodec<>("Warps",
-                    new ObjectMapCodec<>(
-                            WarpData.CODEC,
-                            HashMap::new,
-                            key -> key,  // String -> String (no conversion needed)
-                            str -> str   // String -> String (no conversion needed)
-                    )),
+                            new MapCodec<>(
+                                    WarpData.CODEC,
+                                    HashMap::new
+                            )),
                     (config, val) -> config.warps = val != null ? new HashMap<>(val) : new HashMap<>(),
                     config -> config.warps).add()
             .build();

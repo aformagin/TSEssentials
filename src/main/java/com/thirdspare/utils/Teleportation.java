@@ -1,10 +1,8 @@
 package com.thirdspare.utils;
 
-import com.hypixel.hytale.builtin.beds.BedsPlugin;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Transform;
 import com.hypixel.hytale.math.vector.Rotation3f;
-import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerRespawnPointData;
+import com.hypixel.hytale.math.vector.Transform;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -31,8 +29,8 @@ public class Teleportation {
      * @param worldUUID The UUID of the world to teleport to
      */
     public static void teleportPlayer(PlayerRef playerRef, double x, double y, double z,
-                                     float pitch, float yaw, float roll,
-                                     UUID worldUUID) {
+                                      float pitch, float yaw, float roll,
+                                      UUID worldUUID) {
         World world = Universe.get().getWorld(worldUUID);
 
         if (world == null) {

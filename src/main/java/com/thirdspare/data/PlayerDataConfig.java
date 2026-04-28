@@ -3,7 +3,7 @@ package com.thirdspare.data;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.codec.codecs.map.ObjectMapCodec;
+import com.hypixel.hytale.codec.codecs.map.MapCodec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -166,11 +166,9 @@ public class PlayerDataConfig {
                     (config, val) -> config.maxHomes = val,
                     config -> config.maxHomes).add()
             .append(new KeyedCodec<>("PlayerHomes",
-                    new ObjectMapCodec<>(
+                    new MapCodec<>(
                             PlayerHomeData.CODEC,
-                            HashMap::new,
-                            key -> key,  // String -> String (no conversion needed)
-                            str -> str   // String -> String (no conversion needed)
+                            HashMap::new
                     )),
                     (config, val) -> config.playerHomes = val != null ? new HashMap<>(val) : new HashMap<>(),
                     config -> config.playerHomes).add()

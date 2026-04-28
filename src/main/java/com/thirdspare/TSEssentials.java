@@ -130,7 +130,6 @@ public class TSEssentials extends JavaPlugin {
 
     /**
      * Get the player data configuration
-     *
      * @return The player data config instance
      */
     public PlayerDataConfig getPlayerData() {
@@ -148,7 +147,6 @@ public class TSEssentials extends JavaPlugin {
 
     /**
      * Get the warp data configuration
-     *
      * @return The warp data config instance
      */
     public WarpConfig getWarpData() {
@@ -166,7 +164,6 @@ public class TSEssentials extends JavaPlugin {
 
     /**
      * Get the spawn data configuration
-     *
      * @return The spawn data config instance
      */
     public SpawnConfig getSpawnData() {
@@ -184,7 +181,6 @@ public class TSEssentials extends JavaPlugin {
 
     /**
      * Get the teleport request manager
-     *
      * @return The teleport request manager instance
      */
     public TeleportRequestManager getTeleportRequestManager() {
