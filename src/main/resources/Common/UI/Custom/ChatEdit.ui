@@ -1,0 +1,43 @@
+$Common = "Common.ui";
+
+Group {
+  LayoutMode: Center;
+
+  Group #ChatEditPanel {
+    Anchor: (Width: 920, Height: 720);
+    LayoutMode: Top;
+    Padding: (Full: 32);
+
+    Label #Title {
+      Style: (FontSize: 34, Alignment: Center);
+      Anchor: (Height: 52);
+      Text: "TSChat Channels";
+    }
+
+    Label #Subtitle {
+      Style: (FontSize: 18, Alignment: Center);
+      Anchor: (Top: 8, Height: 32);
+      Text: "Configured channels and edit commands";
+    }
+
+    Label #ChannelList {
+      Style: (FontSize: 20, Alignment: Left);
+      Anchor: (Top: 28, Width: 840, Height: 430);
+      Text: "";
+      Padding: (Full: 12);
+    }
+
+    Label #CommandTitle {
+      Style: (FontSize: 22, Alignment: Left);
+      Anchor: (Top: 20, Height: 34);
+      Text: "Commands";
+    }
+
+    Label #CommandHelp {
+      Style: (FontSize: 18, Alignment: Left);
+      Anchor: (Top: 8, Width: 840, Height: 80);
+      Text: "";
+      Padding: (Full: 8);
+    }
+  }
+}

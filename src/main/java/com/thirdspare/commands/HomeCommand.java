@@ -36,8 +36,8 @@ public class HomeCommand extends AbstractCommand {
         // Get optional home name from command arguments
         String homeName = commandContext.get(homeNameArg);
 
-        //Read home location from player_data
-        PlayerHomeData homeData = plugin.getPlayerData().getHome(playerRef.getUuid(), homeName);
+        // Read home location from the player's persistent ECS component.
+        PlayerHomeData homeData = plugin.getHomeService().getHome(playerRef, homeName);
 
         if (homeData == null) {
             // No home set - send error notification

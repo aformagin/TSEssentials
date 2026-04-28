@@ -31,15 +31,13 @@ public class SetHomeCommand extends AbstractCommand {
         if (playerRef == null) {
             return CompletableFuture.completedFuture(null);
         }
-        var playerUUID = playerRef.getUuid();
-
         // Get optional home name from command arguments
         String homeName = commandContext.get(homeNameArg);
 
         // Check if player has reached max homes limit (only if setting a new home)
-        if (!plugin.getPlayerData().hasHome(playerUUID, homeName)) {
-            int currentHomes = plugin.getPlayerData().getHomeCount(playerUUID);
-            int maxHomes = plugin.getPlayerData().getMaxHomes();
+        if (!plugin.getHomeService().hasHome(playerRef, homeName)) {
+            int currentHomes = plugin.getHomeService().getHomeCount(playerRef);
+            int maxHomes = plugin.getHomeService().getMaxHomes();
 
             if (currentHomes >= maxHomes) {
                 // Send error notification - home limit reached
@@ -60,7 +58,7 @@ public class SetHomeCommand extends AbstractCommand {
         //UUID null should not be possible
         if (worldUUID == null) return CompletableFuture.completedFuture(null);
 
-        //Save current location to data file
+        // Save current location to the player's persistent ECS component.
         PlayerHomeData homeData = new PlayerHomeData(
                 worldUUID.toString(),
                 playerTransformPosition.x(),
@@ -71,8 +69,7 @@ public class SetHomeCommand extends AbstractCommand {
                 playerTransformRotation.roll()
         );
 
-        plugin.getPlayerData().setHome(playerUUID, homeName, homeData);
-        plugin.savePlayerData();
+        plugin.getHomeService().setHome(playerRef, homeName, homeData);
 
         //Send the notification
         String homeNameDisplay = (homeName != null && !homeName.isEmpty()) ? " '" + homeName + "'" : "";

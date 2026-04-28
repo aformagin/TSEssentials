@@ -111,6 +111,25 @@ public class PlayerDataConfig {
     }
 
     /**
+     * Get legacy homes for a player keyed by ECS home name.
+     * This supports one-time migration into PlayerHomesComponent.
+     *
+     * @param playerUUID The player's UUID
+     * @return Map of normalized home names to home data
+     */
+    public Map<String, PlayerHomeData> getHomes(UUID playerUUID) {
+        Map<String, PlayerHomeData> homes = new HashMap<>();
+        String uuidPrefix = playerUUID.toString() + ":";
+        playerHomes.forEach((key, value) -> {
+            if (key.startsWith(uuidPrefix)) {
+                String homeName = key.substring(uuidPrefix.length());
+                homes.put(homeName == null || homeName.isBlank() ? "default" : homeName.toLowerCase(), value);
+            }
+        });
+        return homes;
+    }
+
+    /**
      * Get the maximum number of homes allowed per player
      * @return The max homes limit
      */
