@@ -18,6 +18,14 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
 -   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
 
+## Project Roadmap & Documentation
+
+Detailed planning and design documents for upcoming features can be found in the `Research/Planning Documents` directory:
+-   **[[TSEssentials (Hytale Plugin)]]** - Main project overview and completed features.
+-   **[[TSEconomy_Planning]]** - Digital currency and player shop system design.
+-   **[[TSChat_Planning]]** - Chat channels, focus modes, and nickname system.
+-   **[[TSClaims_Planning]]** - Land protection and trusted member system.
+
 ## Commands
 
 ### Home Commands
