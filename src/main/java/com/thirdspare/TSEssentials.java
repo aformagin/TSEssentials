@@ -118,7 +118,10 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new ChatEditCommand(channelManager));
 
         /* Event Registry */
-        this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, ExampleEvent::onPlayerReady);
+        this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
+            ExampleEvent.onPlayerReady(event);
+            chatService.loadSettings(event.getPlayer().getPlayerRef());
+        });
         this.getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener(chatService)::onPlayerChat);
     }
 

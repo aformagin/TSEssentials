@@ -6,6 +6,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.data.chat.ChatChannel;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatService {
     private static final String ERROR_COLOR = "#FF6B6B";
@@ -20,6 +22,7 @@ public class ChatService {
 
     private final ChannelManager channelManager;
     private final ComponentType<EntityStore, PlayerChatSettingsComponent> settingsComponentType;
+    private final ConcurrentHashMap<UUID, PlayerChatSettingsComponent> runtimeSettings = new ConcurrentHashMap<>();
 
     public ChatService(ChannelManager channelManager,
                        ComponentType<EntityStore, PlayerChatSettingsComponent> settingsComponentType) {
@@ -32,11 +35,35 @@ public class ChatService {
     }
 
     public PlayerChatSettingsComponent getSettings(PlayerRef player) {
-        Ref<EntityStore> ref = player.getReference();
-        Store<EntityStore> store = ref.getStore();
-        PlayerChatSettingsComponent settings = store.ensureAndGetComponent(ref, settingsComponentType);
-        repairSettings(player, settings);
+        PlayerChatSettingsComponent settings = runtimeSettings.computeIfAbsent(
+                player.getUuid(),
+                ignored -> new PlayerChatSettingsComponent()
+        );
+        synchronized (settings) {
+            repairSettings(player, settings);
+        }
         return settings;
+    }
+
+    public void loadSettings(PlayerRef player) {
+        World world = Universe.get().getWorld(player.getWorldUuid());
+        if (world == null) {
+            return;
+        }
+        world.execute(() -> {
+            if (!player.isValid()) {
+                return;
+            }
+            try {
+                Ref<EntityStore> ref = player.getReference();
+                Store<EntityStore> store = ref.getStore();
+                PlayerChatSettingsComponent storedSettings = store.ensureAndGetComponent(ref, settingsComponentType);
+                repairSettings(player, storedSettings);
+                runtimeSettings.put(player.getUuid(), new PlayerChatSettingsComponent(storedSettings));
+            } catch (IllegalStateException ignored) {
+                runtimeSettings.computeIfAbsent(player.getUuid(), ignoredUuid -> new PlayerChatSettingsComponent());
+            }
+        });
     }
 
     public ChatChannel resolveFocusChannel(PlayerRef sender) {
@@ -44,14 +71,17 @@ public class ChatService {
         ChatChannel channel = channelManager.getChannel(settings.getFocusChannel());
         if (channel == null || !canUseChannel(sender, channel)) {
             channel = channelManager.getGlobalChannel();
-            settings.setFocusChannel(channel.getName());
-            settings.subscribe(channel.getName());
+            synchronized (settings) {
+                settings.setFocusChannel(channel.getName());
+                settings.subscribe(channel.getName());
+            }
+            saveSettings(sender, settings);
         }
         return channel;
     }
 
     public boolean canUseChannel(PlayerRef player, ChatChannel channel) {
-        return channel != null && (!channel.hasPermissionNode() || player.hasPermission(channel.getPermission(), false));
+        return channel != null && (!channel.hasPermissionNode() || hasPermission(player, channel.getPermission()));
     }
 
     public List<PlayerRef> filterRecipients(PlayerRef sender, Collection<PlayerRef> candidates, ChatChannel channel) {
@@ -68,11 +98,13 @@ public class ChatService {
                 continue;
             }
             PlayerChatSettingsComponent targetSettings = getSettings(target);
-            if (!targetSettings.isSubscribed(channel.getName())) {
-                continue;
-            }
-            if (targetSettings.ignores(sender.getUuid())) {
-                continue;
+            synchronized (targetSettings) {
+                if (!targetSettings.isSubscribed(channel.getName())) {
+                    continue;
+                }
+                if (targetSettings.ignores(sender.getUuid())) {
+                    continue;
+                }
             }
             if (!isWithinRange(sender, target, channel)) {
                 continue;
@@ -122,8 +154,11 @@ public class ChatService {
             return;
         }
         PlayerChatSettingsComponent settings = getSettings(player);
-        settings.subscribe(channel.getName());
-        settings.setFocusChannel(channel.getName());
+        synchronized (settings) {
+            settings.subscribe(channel.getName());
+            settings.setFocusChannel(channel.getName());
+        }
+        saveSettings(player, settings);
         player.sendMessage(Message.raw("Focus channel set to " + channel.getName() + ".").color(SUCCESS_COLOR));
     }
 
@@ -137,22 +172,29 @@ public class ChatService {
             player.sendMessage(Message.raw("You do not have permission to join " + channel.getName() + ".").color(ERROR_COLOR));
             return;
         }
-        getSettings(player).subscribe(channel.getName());
+        PlayerChatSettingsComponent settings = getSettings(player);
+        synchronized (settings) {
+            settings.subscribe(channel.getName());
+        }
+        saveSettings(player, settings);
         player.sendMessage(Message.raw("Joined " + channel.getName() + ".").color(SUCCESS_COLOR));
     }
 
     public void leave(PlayerRef player, String channelName) {
         String normalized = ChatChannel.normalizeName(channelName);
         PlayerChatSettingsComponent settings = getSettings(player);
-        if (ChannelManager.GLOBAL.equals(normalized)) {
-            player.sendMessage(Message.raw("You cannot leave global chat.").color(ERROR_COLOR));
-            return;
+        synchronized (settings) {
+            if (ChannelManager.GLOBAL.equals(normalized)) {
+                player.sendMessage(Message.raw("You cannot leave global chat.").color(ERROR_COLOR));
+                return;
+            }
+            settings.unsubscribe(normalized);
+            if (normalized.equals(settings.getFocusChannel())) {
+                settings.setFocusChannel(ChannelManager.GLOBAL);
+                settings.subscribe(ChannelManager.GLOBAL);
+            }
         }
-        settings.unsubscribe(normalized);
-        if (normalized.equals(settings.getFocusChannel())) {
-            settings.setFocusChannel(ChannelManager.GLOBAL);
-            settings.subscribe(ChannelManager.GLOBAL);
-        }
+        saveSettings(player, settings);
         player.sendMessage(Message.raw("Left " + normalized + ".").color(SUCCESS_COLOR));
     }
 
@@ -163,8 +205,12 @@ public class ChatService {
             if (!canUseChannel(player, channel)) {
                 continue;
             }
-            String marker = channel.getName().equals(settings.getFocusChannel()) ? "*" : "";
-            String listening = settings.isSubscribed(channel.getName()) ? "+" : "-";
+            String marker;
+            String listening;
+            synchronized (settings) {
+                marker = channel.getName().equals(settings.getFocusChannel()) ? "*" : "";
+                listening = settings.isSubscribed(channel.getName()) ? "+" : "-";
+            }
             message.insert(Message.raw(listening + marker + channel.getName() + " ").color(channel.getColor()));
         }
         player.sendMessage(message);
@@ -175,44 +221,60 @@ public class ChatService {
             player.sendMessage(Message.raw("You cannot ignore yourself.").color(ERROR_COLOR));
             return;
         }
-        getSettings(player).ignore(target.getUuid());
+        PlayerChatSettingsComponent settings = getSettings(player);
+        synchronized (settings) {
+            settings.ignore(target.getUuid());
+        }
+        saveSettings(player, settings);
         player.sendMessage(Message.raw("Ignoring " + target.getUsername() + ".").color(SUCCESS_COLOR));
     }
 
     public void unignore(PlayerRef player, PlayerRef target) {
-        getSettings(player).unignore(target.getUuid());
+        PlayerChatSettingsComponent settings = getSettings(player);
+        synchronized (settings) {
+            settings.unignore(target.getUuid());
+        }
+        saveSettings(player, settings);
         player.sendMessage(Message.raw("No longer ignoring " + target.getUsername() + ".").color(SUCCESS_COLOR));
     }
 
     public void setNickname(PlayerRef player, String nickname) {
         PlayerChatSettingsComponent settings = getSettings(player);
-        if (nickname == null || nickname.isBlank() || nickname.equalsIgnoreCase("off")) {
-            settings.setNickname("");
-            player.sendMessage(Message.raw("Nickname cleared.").color(SUCCESS_COLOR));
-            return;
+        synchronized (settings) {
+            if (nickname == null || nickname.isBlank() || nickname.equalsIgnoreCase("off")) {
+                settings.setNickname("");
+                saveSettings(player, settings);
+                player.sendMessage(Message.raw("Nickname cleared.").color(SUCCESS_COLOR));
+                return;
+            }
+            String trimmed = nickname.trim();
+            if (trimmed.length() > 24) {
+                player.sendMessage(Message.raw("Nicknames must be 24 characters or fewer.").color(ERROR_COLOR));
+                return;
+            }
+            settings.setNickname(trimmed);
+            saveSettings(player, settings);
+            player.sendMessage(Message.raw("Nickname set to " + trimmed + ".").color(SUCCESS_COLOR));
         }
-        String trimmed = nickname.trim();
-        if (trimmed.length() > 24) {
-            player.sendMessage(Message.raw("Nicknames must be 24 characters or fewer.").color(ERROR_COLOR));
-            return;
-        }
-        settings.setNickname(trimmed);
-        player.sendMessage(Message.raw("Nickname set to " + trimmed + ".").color(SUCCESS_COLOR));
     }
 
     public void setNicknameColor(PlayerRef player, String color) {
         PlayerChatSettingsComponent settings = getSettings(player);
-        if (color == null || color.isBlank() || color.equalsIgnoreCase("off")) {
-            settings.setNicknameColor("");
-            player.sendMessage(Message.raw("Nickname color cleared.").color(SUCCESS_COLOR));
-            return;
+        synchronized (settings) {
+            if (color == null || color.isBlank() || color.equalsIgnoreCase("off")) {
+                settings.setNicknameColor("");
+                saveSettings(player, settings);
+                player.sendMessage(Message.raw("Nickname color cleared.").color(SUCCESS_COLOR));
+                return;
+            }
+            if (!ChannelManager.isValidColor(color)) {
+                player.sendMessage(Message.raw("Colors must use #RRGGBB format.").color(ERROR_COLOR));
+                return;
+            }
+            settings.setNicknameColor(color);
+            saveSettings(player, settings);
+            player.sendMessage(Message.raw("Nickname color set.").color(SUCCESS_COLOR));
         }
-        if (!ChannelManager.isValidColor(color)) {
-            player.sendMessage(Message.raw("Colors must use #RRGGBB format.").color(ERROR_COLOR));
-            return;
-        }
-        settings.setNicknameColor(color);
-        player.sendMessage(Message.raw("Nickname color set.").color(SUCCESS_COLOR));
     }
 
     public void repairSettings(PlayerRef player, PlayerChatSettingsComponent settings) {
@@ -249,12 +311,70 @@ public class ChatService {
     }
 
     private String getDisplayName(PlayerRef player) {
-        String nickname = getSettings(player).getNickname();
+        PlayerChatSettingsComponent settings = getSettings(player);
+        String nickname;
+        synchronized (settings) {
+            nickname = settings.getNickname();
+        }
         return nickname == null || nickname.isBlank() ? player.getUsername() : nickname;
     }
 
     private String getDisplayColor(PlayerRef player) {
-        String color = getSettings(player).getNicknameColor();
+        PlayerChatSettingsComponent settings = getSettings(player);
+        String color;
+        synchronized (settings) {
+            color = settings.getNicknameColor();
+        }
         return color == null || color.isBlank() ? "#FFFFFF" : color;
+    }
+
+    private void saveSettings(PlayerRef player, PlayerChatSettingsComponent settings) {
+        PlayerChatSettingsComponent snapshot;
+        synchronized (settings) {
+            snapshot = new PlayerChatSettingsComponent(settings);
+        }
+        World world = Universe.get().getWorld(player.getWorldUuid());
+        if (world == null) {
+            return;
+        }
+        world.execute(() -> {
+            if (!player.isValid()) {
+                return;
+            }
+            try {
+                Ref<EntityStore> ref = player.getReference();
+                Store<EntityStore> store = ref.getStore();
+                PlayerChatSettingsComponent storedSettings = store.ensureAndGetComponent(ref, settingsComponentType);
+                copySettings(snapshot, storedSettings);
+            } catch (IllegalStateException ignored) {
+                // The player can leave before a queued save runs; runtime settings already hold the latest value.
+            }
+        });
+    }
+
+    private void copySettings(PlayerChatSettingsComponent source, PlayerChatSettingsComponent target) {
+        target.setFocusChannel(source.getFocusChannel());
+        target.getSubscribedChannels().clear();
+        target.getSubscribedChannels().addAll(source.getSubscribedChannels());
+        target.getIgnoredPlayerUuids().clear();
+        target.getIgnoredPlayerUuids().addAll(source.getIgnoredPlayerUuids());
+        target.setNickname(source.getNickname());
+        target.setNicknameColor(source.getNicknameColor());
+    }
+
+    private boolean hasPermission(PlayerRef player, String permission) {
+        try {
+            return (boolean) player.getClass()
+                    .getMethod("hasPermission", String.class)
+                    .invoke(player, permission);
+        } catch (ReflectiveOperationException ignored) {
+            try {
+                return (boolean) player.getClass()
+                        .getMethod("hasPermission", String.class, boolean.class)
+                        .invoke(player, permission, false);
+            } catch (ReflectiveOperationException ignoredAgain) {
+                return false;
+            }
+        }
     }
 }

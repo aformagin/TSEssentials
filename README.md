@@ -10,6 +10,10 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Server Warps:** Enables server administrators to create a network of server-wide warp points, facilitating easy travel to key locations like cities, dungeons, or event areas.
 -   **Server Spawn:** A global spawn point that any player can teleport to.
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
+-   **Chat Channels:** Organize communication with joinable channels (Global, Local, Staff). Supports range-based local chat and multi-channel subscriptions.
+-   **Nicknames:** Allows players to set custom display names with color support.
+-   **Economy & Shops (Planned):** Digital currency system and player-run marketplaces.
+-   **Land Claims (Planned):** Robust protection system to prevent griefing.
 -   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
 -   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
 -   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
@@ -59,6 +63,24 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
     -   **Description:** Denies the most recent pending teleport request.
     -   **Usage:** `/tpdeny`
 -   **Note:** Teleport requests expire after 120 seconds. Only one request per sender-target pair is active at a time; sending a new request replaces any existing one.
+
+### Chat Commands
+
+-   `/ch <channel-name>`
+    -   **Description:** Sets your focus to the specified channel. Any messages you type will be sent there by default.
+    -   **Usage:** `/ch global` or `/ch local`
+-   `/ch join <channel-name>`
+    -   **Description:** Joins a channel so you can receive its messages.
+    -   **Usage:** `/ch join staff`
+-   `/ch leave <channel-name>`
+    -   **Description:** Leaves a channel.
+    -   **Usage:** `/ch leave global`
+-   `/nick <nickname>`
+    -   **Description:** Sets your display name on the server.
+    -   **Usage:** `/nick SuperSteve`
+-   `/ignore <player>`
+    -   **Description:** Mutes messages from the specified player.
+    -   **Usage:** `/ignore GrieferDan`
 
 ### Admin Commands
 

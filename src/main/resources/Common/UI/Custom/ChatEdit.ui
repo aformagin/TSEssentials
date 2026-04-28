@@ -10,31 +10,34 @@ Group {
 
     Label #Title {
       Style: (FontSize: 34, Alignment: Center);
-      Anchor: (Height: 52);
+      Anchor: (Top: 24);
       Text: "TSChat Channels";
+      Padding: (Full: 10);
     }
 
     Label #Subtitle {
       Style: (FontSize: 18, Alignment: Center);
-      Anchor: (Top: 8, Height: 32);
+      Anchor: (Top: 8);
       Text: "Configured channels and edit commands";
+      Padding: (Full: 10);
     }
 
     Label #ChannelList {
-      Style: (FontSize: 20, Alignment: Left);
+      Style: (FontSize: 20, HorizontalAlignment: Start);
       Anchor: (Top: 28, Width: 840, Height: 430);
       Text: "";
       Padding: (Full: 12);
     }
 
     Label #CommandTitle {
-      Style: (FontSize: 22, Alignment: Left);
-      Anchor: (Top: 20, Height: 34);
+      Style: (FontSize: 22, HorizontalAlignment: Start);
+      Anchor: (Top: 20);
       Text: "Commands";
+      Padding: (Full: 8);
     }
 
     Label #CommandHelp {
-      Style: (FontSize: 18, Alignment: Left);
+      Style: (FontSize: 18, HorizontalAlignment: Start);
       Anchor: (Top: 8, Width: 840, Height: 80);
       Text: "";
       Padding: (Full: 8);

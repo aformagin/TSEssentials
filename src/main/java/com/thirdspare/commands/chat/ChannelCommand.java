@@ -1,9 +1,7 @@
 package com.thirdspare.commands.chat;
 
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -15,15 +13,15 @@ import java.util.concurrent.CompletableFuture;
 
 public class ChannelCommand extends AbstractCommand {
     private final ChatService chatService;
-    private final RequiredArg<String> actionArg;
-    private final OptionalArg<String> channelArg;
 
     public ChannelCommand(ChatService chatService) {
         super("channel", "Manage chat channel subscriptions");
         this.chatService = chatService;
-        this.actionArg = withRequiredArg("action", "list, focus, join, or leave", ArgTypes.STRING);
-        this.channelArg = withOptionalArg("channel", "Channel name", ArgTypes.STRING);
         addAliases("ch");
+        addSubCommand(new ListSubCommand(chatService));
+        addSubCommand(new FocusSubCommand(chatService));
+        addSubCommand(new JoinSubCommand(chatService));
+        addSubCommand(new LeaveSubCommand(chatService));
     }
 
     @Override
@@ -33,35 +31,85 @@ public class ChannelCommand extends AbstractCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        String action = context.get(actionArg).toLowerCase();
-        String channel = context.get(channelArg);
+        chatService.listChannels(player);
+        return CompletableFuture.completedFuture(null);
+    }
 
-        switch (action) {
-            case "list" -> chatService.listChannels(player);
-            case "focus" -> {
-                if (channel == null || channel.isBlank()) {
-                    player.sendMessage(Message.raw("Usage: /channel focus <channel>").color("#FF6B6B"));
-                } else {
-                    chatService.focus(player, channel);
-                }
-            }
-            case "join" -> {
-                if (channel == null || channel.isBlank()) {
-                    player.sendMessage(Message.raw("Usage: /channel join <channel>").color("#FF6B6B"));
-                } else {
-                    chatService.join(player, channel);
-                }
-            }
-            case "leave" -> {
-                if (channel == null || channel.isBlank()) {
-                    player.sendMessage(Message.raw("Usage: /channel leave <channel>").color("#FF6B6B"));
-                } else {
-                    chatService.leave(player, channel);
-                }
-            }
-            default -> player.sendMessage(Message.raw("Usage: /channel list|focus|join|leave [channel]").color("#FF6B6B"));
+    private static final class ListSubCommand extends AbstractCommand {
+        private final ChatService chatService;
+
+        private ListSubCommand(ChatService chatService) {
+            super("list", "List available chat channels");
+            this.chatService = chatService;
         }
 
-        return CompletableFuture.completedFuture(null);
+        @Override
+        protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
+            PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
+            if (player != null) {
+                chatService.listChannels(player);
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static final class FocusSubCommand extends AbstractCommand {
+        private final ChatService chatService;
+        private final RequiredArg<String> channelArg;
+
+        private FocusSubCommand(ChatService chatService) {
+            super("focus", "Set your active chat channel");
+            this.chatService = chatService;
+            this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
+        }
+
+        @Override
+        protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
+            PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
+            if (player != null) {
+                chatService.focus(player, context.get(channelArg));
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static final class JoinSubCommand extends AbstractCommand {
+        private final ChatService chatService;
+        private final RequiredArg<String> channelArg;
+
+        private JoinSubCommand(ChatService chatService) {
+            super("join", "Subscribe to a chat channel");
+            this.chatService = chatService;
+            this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
+        }
+
+        @Override
+        protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
+            PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
+            if (player != null) {
+                chatService.join(player, context.get(channelArg));
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static final class LeaveSubCommand extends AbstractCommand {
+        private final ChatService chatService;
+        private final RequiredArg<String> channelArg;
+
+        private LeaveSubCommand(ChatService chatService) {
+            super("leave", "Unsubscribe from a chat channel");
+            this.chatService = chatService;
+            this.channelArg = withRequiredArg("channel", "Channel name", ArgTypes.STRING);
+        }
+
+        @Override
+        protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
+            PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
+            if (player != null) {
+                chatService.leave(player, context.get(channelArg));
+            }
+            return CompletableFuture.completedFuture(null);
+        }
     }
 }

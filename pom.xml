@@ -6,7 +6,7 @@
 
     <groupId>com.thirdspare</groupId>
     <artifactId>TSEssentials</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1.0-CHAT-SNAPSHOT</version>
 
     <properties>
         <hytale.server.version>2026.04.23-3f4475f43</hytale.server.version>
