@@ -12,13 +12,41 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
 -   **Chat Channels:** Organize communication with joinable channels (Global, Local, Staff). Supports range-based local chat and multi-channel subscriptions.
 -   **Nicknames:** Allows players to set custom display names with color support.
+-   **Economy System (V1):** Digital currency system with player accounts, admin management, and an in-game UI.
 -   **Optional Permissions Module:** Drop-in plain-JAR module for TSEssentials-managed groups, permission nodes, memberships, and an in-game admin UI. It is additive and does not replace Hytale's default permission provider.
--   **Economy & Shops (Planned):** Digital currency system and player-run marketplaces.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
 -   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
 -   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
 -   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
 -   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
+
+## TSEssentials Module System
+
+TSEssentials features a robust, optional module system that allows for additive functionality without bloating the core plugin. Modules are plain JAR files that are discovered and loaded at runtime.
+
+### Drop-in Modules
+
+To install an optional module:
+1.  Create a folder named `TSEssentialsModules` in the server's `UserData/Mods/` directory (beside the main `TSEssentials.jar`).
+2.  Drop the module JAR (e.g., `TSEssentials-Permissions-1.1.0.jar`) into this folder.
+3.  Restart the server.
+
+### Discovery & Lifecycle
+
+The core plugin automatically scans the `TSEssentialsModules` directory for any JAR files starting with `TSEssentials-`. Each module undergoes a strict lifecycle:
+-   **Discovery:** JARs are identified and loaded into isolated classloaders.
+-   **Registration:** Modules receive a `TSEModuleContext` to register their own configurations, commands, and ECS components.
+-   **Enablement:** Modules are enabled after the core plugin has finished its own initialization.
+-   **Player Sync:** Modules are notified when a player is ready, allowing for dynamic data synchronization.
+-   **Shutdown:** Modules are cleanly disabled when the server stops, ensuring data integrity.
+
+### Developer API
+
+Developers can create their own modules by implementing the `TSEModule` interface and providing a `TSEModuleDescriptor`. Access to core services is provided through the `TSEModuleContext`, which includes:
+-   **Config Registration:** Simple, codec-backed JSON configuration management.
+-   **Command Registration:** Integration with Hytale's command system.
+-   **ECS Component Registration:** Support for custom player or entity data.
+-   **Event Access:** Access to the global `EventRegistry`.
 
 ## Commands
 
@@ -84,6 +112,19 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
     -   **Description:** Mutes messages from the specified player.
     -   **Usage:** `/ignore GrieferDan`
 
+### Economy Commands
+
+-   `/balance [player]`
+    -   **Description:** Checks your current balance or the balance of another player.
+-   `/pay <player> <amount>`
+    -   **Description:** Sends money to another player.
+-   `/eco <give|take|set> <player> <amount>`
+    -   **Description:** Admin command to manage player balances.
+-   `/wallet`
+    -   **Description:** Opens the player economy UI.
+-   `/econadmin`
+    -   **Description:** Opens the admin economy management UI.
+
 ### Admin Commands
 
 -   `/tphere <player>`
@@ -130,91 +171,17 @@ This file stores information about each player's set homes.
     -   The key is a string formatted as `"player-uuid:home-name"`. The default home uses `"player-uuid:default"`.
     -   The location data includes the world's UUID, coordinates (X, Y, Z), and rotation (Pitch, Yaw, Roll).
 
-**Example `player_data.json`:**
-```json
-{
-  "MaxHomes": 2,
-  "PlayerHomes": {
-    "a1b2c3d4-e5f6-7890-1234-567890abcdef:default": {
-      "WorldUUID": "a-world-uuid-string",
-      "X": 150.5,
-      "Y": 64.0,
-      "Z": -200.2,
-      "Pitch": 0.0,
-      "Yaw": -90.0,
-      "Roll": 0.0
-    },
-    "a1b2c3d4-e5f6-7890-1234-567890abcdef:mining_outpost": {
-      "WorldUUID": "a-world-uuid-string",
-      "X": 3000.0,
-      "Y": 45.0,
-      "Z": 1500.7,
-      "Pitch": 15.0,
-      "Yaw": 45.5,
-      "Roll": 0.0
-    }
-  }
-}
-```
-
 ### `warp_data.json`
 
 This file stores the locations of all server-wide warp points.
 
 -   `Warps`: An object where each key is the name of the warp (in lowercase) and the value is the location data for that warp.
 
-**Example `warp_data.json`:**
-```json
-{
-  "Warps": {
-    "spawn": {
-      "WorldUUID": "a-world-uuid-string",
-      "X": 0.0,
-      "Y": 70.0,
-      "Z": 0.0,
-      "Pitch": 0.0,
-      "Yaw": 180.0,
-      "Roll": 0.0
-    },
-    "market": {
-      "WorldUUID": "a-world-uuid-string",
-      "X": -120.5,
-      "Y": 72.0,
-      "Z": 55.8,
-      "Pitch": 0.0,
-      "Yaw": 0.0,
-      "Roll": 0.0
-    }
-  }
-}
-```
-
 ### `spawn_data.json`
 
 This file stores the single, global server spawn point.
 
 -   `Spawn`: An object containing the location data for the server spawn. If no spawn is set, this object will be absent or null.
-    -   The location data includes the world's UUID, coordinates (X, Y, Z), and rotation (Pitch, Yaw, Roll).
-
-**Example `spawn_data.json` (Spawn Set):**
-```json
-{
-  "Spawn": {
-    "WorldUUID": "another-world-uuid-string",
-    "X": 100.0,
-    "Y": 60.0,
-    "Z": 100.0,
-    "Pitch": 0.0,
-    "Yaw": 0.0,
-    "Roll": 0.0
-  }
-}
-```
-
-**Example `spawn_data.json` (No Spawn Set):**
-```json
-{}
-```
 
 ## Optional Permissions Module
 
@@ -234,4 +201,4 @@ The module stores authoritative data in codec-backed JSON files under the core p
 
 Player ECS data is only an online mirror of group memberships. Removing the permissions module JAR leaves the JSON files untouched, and core TSEssentials continues to boot without the module.
 
-The permissions admin page is registered by the optional module, but its `PermissionsAdmin.ui` document is packaged with the core plugin resources because Hytale Custom UI document lookup does not resolve resources from child-loaded optional module JARs. The CLI commands remain the supported fallback if custom UI loading changes in a future runtime.
+The permissions admin page is registered by the optional module, but its `PermissionsAdmin.ui` document is packaged with the core plugin resources because Hytale Custom UI document loader logic. The CLI commands remain the supported fallback if custom UI loading changes in a future runtime.
