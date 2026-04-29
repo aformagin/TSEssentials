@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.utils.CommandUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -368,19 +369,7 @@ public class ChatService {
     }
 
     private boolean hasPermission(PlayerRef player, String permission) {
-        try {
-            return (boolean) player.getClass()
-                    .getMethod("hasPermission", String.class)
-                    .invoke(player, permission);
-        } catch (ReflectiveOperationException ignored) {
-            try {
-                return (boolean) player.getClass()
-                        .getMethod("hasPermission", String.class, boolean.class)
-                        .invoke(player, permission, false);
-            } catch (ReflectiveOperationException ignoredAgain) {
-                return false;
-            }
-        }
+        return CommandUtils.hasPermission(player, permission);
     }
 
     private Collection<PlayerRef> getOnlinePlayers(PlayerRef sender) {

@@ -27,6 +27,15 @@ public final class TSEssentialsPermissions {
     public static final String NICK = "tsessentials.command.nick";
     public static final String NICK_COLOR = "tsessentials.command.nickcolor";
     public static final String CHAT_EDIT = "tsessentials.command.chatedit";
+    public static final String BALANCE = "tsessentials.command.balance";
+    public static final String BALANCE_OTHERS = "tsessentials.command.balance.others";
+    public static final String PAY = "tsessentials.command.pay";
+    public static final String ECONOMY_UI = "tsessentials.command.economy";
+    public static final String ECO = "tsessentials.command.eco";
+    public static final String ECO_ADMIN_UI = "tsessentials.command.ecoadmin";
+    public static final String ECO_GIVE = "tsessentials.command.eco.give";
+    public static final String ECO_TAKE = "tsessentials.command.eco.take";
+    public static final String ECO_SET = "tsessentials.command.eco.set";
 
     private TSEssentialsPermissions() {
     }

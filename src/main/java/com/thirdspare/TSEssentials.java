@@ -1,6 +1,5 @@
 package com.thirdspare;
 
-import com.hypixel.hytale.server.core.entity.entities.player.data.PlayerRespawnPointData;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
@@ -13,10 +12,20 @@ import com.thirdspare.chat.ChatService;
 import com.thirdspare.chat.PlayerChatSettingsComponent;
 import com.thirdspare.commands.*;
 import com.thirdspare.commands.chat.*;
+import com.thirdspare.commands.economy.BalanceCommand;
+import com.thirdspare.commands.economy.EcoCommand;
+import com.thirdspare.commands.economy.EconAdminUICommand;
+import com.thirdspare.commands.economy.WalletCommand;
+import com.thirdspare.commands.economy.PayCommand;
 import com.thirdspare.data.chat.ChatChannelConfig;
+import com.thirdspare.data.economy.EconomyAccountsConfig;
+import com.thirdspare.data.economy.EconomyConfig;
 import com.thirdspare.data.PlayerDataConfig;
 import com.thirdspare.data.SpawnConfig;
 import com.thirdspare.data.WarpConfig;
+import com.thirdspare.economy.EconomyManager;
+import com.thirdspare.economy.EconomyService;
+import com.thirdspare.economy.PlayerEconomyComponent;
 import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.events.chat.ChatListener;
 import com.thirdspare.homes.HomeService;
@@ -43,15 +52,24 @@ public class TSEssentials extends JavaPlugin {
     /* Chat channel configuration with codec-based JSON persistence */
     private final Config<ChatChannelConfig> chatChannelConfig = withConfig("chat_channels", ChatChannelConfig.CODEC);
 
+    /* Economy configuration and known account ledger */
+    private final Config<EconomyConfig> economyConfig = withConfig("economy_config", EconomyConfig.CODEC);
+    private final Config<EconomyAccountsConfig> economyAccountsConfig = withConfig("economy_accounts", EconomyAccountsConfig.CODEC);
+
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
     private SpawnConfig spawnData;
     private ChatChannelConfig chatChannelData;
+    private EconomyConfig economyData;
+    private EconomyAccountsConfig economyAccountsData;
     private ComponentType<EntityStore, PlayerChatSettingsComponent> playerChatSettingsComponentType;
     private ComponentType<EntityStore, PlayerHomesComponent> playerHomesComponentType;
+    private ComponentType<EntityStore, PlayerEconomyComponent> playerEconomyComponentType;
     private ChannelManager channelManager;
     private ChatService chatService;
     private HomeService homeService;
+    private EconomyManager economyManager;
+    private EconomyService economyService;
     private TeleportRequestManager teleportRequestManager;
 
     public TSEssentials(@Nonnull JavaPluginInit init) {
@@ -72,6 +90,12 @@ public class TSEssentials extends JavaPlugin {
                         "TSEssentials_PlayerHomes",
                         PlayerHomesComponent.CODEC
                 );
+        playerEconomyComponentType = this.getEntityStoreRegistry()
+                .registerComponent(
+                        PlayerEconomyComponent.class,
+                        "TSEssentials_PlayerEconomy",
+                        PlayerEconomyComponent.CODEC
+                );
 
         /* Set up data directory - automatically handled by withConfig */
         /* This will create a data directory, player_data.json and warp_data.json files */
@@ -90,6 +114,12 @@ public class TSEssentials extends JavaPlugin {
         channelManager = new ChannelManager(chatChannelConfig, chatChannelData);
         chatService = new ChatService(channelManager, playerChatSettingsComponentType);
         this.getLogger().at(Level.INFO).log("Loaded " + channelManager.getChannels().size() + " chat channels");
+
+        economyData = economyConfig.get();
+        economyAccountsData = economyAccountsConfig.get();
+        economyManager = new EconomyManager(economyConfig, economyData, economyAccountsConfig, economyAccountsData);
+        economyService = new EconomyService(economyManager, playerEconomyComponentType);
+        this.getLogger().at(Level.INFO).log("Loaded " + economyAccountsData.getAccounts().size() + " economy accounts");
         this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
                 TSEssentialsPermissions.COMMAND_WILDCARD);
 
@@ -113,19 +143,28 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new TpHereCommand("tphere", "Force teleport a player to you (admin)", this));
 
         this.getCommandRegistry().registerCommand(new ChannelCommand(chatService));
+
         this.getCommandRegistry().registerCommand(new ChannelMessageCommand("g", "Send a global chat message", ChannelManager.GLOBAL, chatService));
         this.getCommandRegistry().registerCommand(new ChannelMessageCommand("l", "Send a local chat message", ChannelManager.LOCAL, chatService));
         this.getCommandRegistry().registerCommand(new ChannelMessageCommand("sc", "Send a staff chat message", ChannelManager.STAFF, chatService));
         this.getCommandRegistry().registerCommand(new IgnoreCommand("ignore", "Ignore a player's chat messages", true, chatService));
         this.getCommandRegistry().registerCommand(new IgnoreCommand("unignore", "Stop ignoring a player's chat messages", false, chatService));
+
         this.getCommandRegistry().registerCommand(new NickCommand(chatService));
         this.getCommandRegistry().registerCommand(new NickColorCommand(chatService));
         this.getCommandRegistry().registerCommand(new ChatEditCommand(channelManager));
+
+        this.getCommandRegistry().registerCommand(new BalanceCommand(economyService));
+        this.getCommandRegistry().registerCommand(new PayCommand(economyService));
+        this.getCommandRegistry().registerCommand(new WalletCommand(economyService));
+        this.getCommandRegistry().registerCommand(new EcoCommand(economyService));
+        this.getCommandRegistry().registerCommand(new EconAdminUICommand(economyService));
 
         /* Event Registry */
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
             ExampleEvent.onPlayerReady(event);
             chatService.loadSettings(event.getPlayer().getPlayerRef());
+            economyService.loadEconomy(event.getPlayer().getPlayerRef());
         });
         this.getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener(chatService)::onPlayerChat);
     }
@@ -211,5 +250,17 @@ public class TSEssentials extends JavaPlugin {
 
     public ComponentType<EntityStore, PlayerHomesComponent> getPlayerHomesComponentType() {
         return playerHomesComponentType;
+    }
+
+    public EconomyManager getEconomyManager() {
+        return economyManager;
+    }
+
+    public EconomyService getEconomyService() {
+        return economyService;
+    }
+
+    public ComponentType<EntityStore, PlayerEconomyComponent> getPlayerEconomyComponentType() {
+        return playerEconomyComponentType;
     }
 }

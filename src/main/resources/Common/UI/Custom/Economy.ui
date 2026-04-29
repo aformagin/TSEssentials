@@ -1,0 +1,107 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #EconomyPanel {
+    Anchor: (Width: 820, Height: 520);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "TSEconomy";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 360, Height: 34);
+        Padding: (Horizontal: 10);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      LayoutMode: Left;
+
+      Group #LeftPane {
+        Anchor: (Width: 300);
+        Background: #252525(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 22);
+
+        Label #PlayerName {
+          Anchor: (Height: 32, Bottom: 12);
+          Style: (FontSize: 18, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "";
+        }
+
+        Label {
+          Anchor: (Height: 24, Bottom: 4);
+          Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+          Text: "Balance";
+        }
+
+        Label #BalanceValue {
+          Anchor: (Height: 58);
+          Style: (FontSize: 32, RenderBold: true, TextColor: #8de969, VerticalAlignment: Center);
+          Text: "$0.00";
+        }
+      }
+
+      Group #RightPane {
+        FlexWeight: 1;
+        Background: #414141(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 24);
+
+        Label {
+          Anchor: (Height: 38, Bottom: 18);
+          Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "Send Money";
+        }
+
+        @FieldLabel { Text: "Player"; }
+        $C.@TextField #RecipientInput {
+          @Anchor = (Height: 38, Bottom: 14);
+        }
+
+        @FieldLabel { Text: "Amount"; }
+        $C.@TextField #AmountInput {
+          @Anchor = (Height: 38, Bottom: 18);
+        }
+
+        Group {
+          FlexWeight: 1;
+        }
+
+        Group #Actions {
+          Anchor: (Height: 46);
+          LayoutMode: Right;
+
+          $C.@TextButton #PayButton {
+            @Anchor = (Width: 150);
+            Text: "Pay";
+          }
+        }
+      }
+    }
+  }
+}
