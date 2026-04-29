@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.thirdspare</groupId>
-    <artifactId>TSEssentials</artifactId>
-    <version>1.1.0-ECON-SNAPSHOT</version>
+    <artifactId>TSEssentials-Permissions</artifactId>
+    <version>1.1.0-PERMISSIONS-SNAPSHOT</version>
 
     <properties>
         <hytale.server.version>2026.03.26-89796e57b</hytale.server.version>
+        <tsessentials.version>1.1.0-ECON-SNAPSHOT</tsessentials.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
@@ -17,12 +18,10 @@
     </properties>
 
     <repositories>
-        <!-- Hytale release repository -->
         <repository>
             <id>hytale-release</id>
             <url>https://maven.hytale.com/release</url>
         </repository>
-        <!-- Hytale pre-release repository -->
         <repository>
             <id>hytale-pre-release</id>
             <url>https://maven.hytale.com/pre-release</url>
@@ -30,6 +29,12 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.thirdspare</groupId>
+            <artifactId>TSEssentials</artifactId>
+            <version>${tsessentials.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.hypixel.hytale</groupId>
             <artifactId>Server</artifactId>
@@ -39,6 +44,7 @@
     </dependencies>
 
     <build>
+        <finalName>TSEssentials-Permissions-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -71,5 +77,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

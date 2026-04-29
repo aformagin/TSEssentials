@@ -4,6 +4,7 @@ import com.hypixel.hytale.protocol.ItemWithAllMetadata;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -72,5 +73,17 @@ public class CommandUtils {
             task.accept(playerRef);
         });
         return true;
+    }
+
+    public static boolean hasPermission(PlayerRef player, String permission) {
+        if (player == null || permission == null || permission.isBlank()) {
+            return false;
+        }
+
+        try {
+            return PermissionsModule.get().hasPermission(player.getUuid(), permission);
+        } catch (RuntimeException ignored) {
+            return false;
+        }
     }
 }
