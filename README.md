@@ -12,6 +12,7 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
 -   **Chat Channels:** Organize communication with joinable channels (Global, Local, Staff). Supports range-based local chat and multi-channel subscriptions.
 -   **Nicknames:** Allows players to set custom display names with color support.
+-   **Optional Permissions Module:** Drop-in plain-JAR module for TSEssentials-managed groups, permission nodes, memberships, and an in-game admin UI. It is additive and does not replace Hytale's default permission provider.
 -   **Economy & Shops (Planned):** Digital currency system and player-run marketplaces.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
 -   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
@@ -88,6 +89,33 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   `/tphere <player>`
     -   **Description:** Instantly teleports the specified player to your current location. No request or confirmation is needed.
     -   **Usage:** `/tphere Steve`
+
+### Optional Permissions Module Commands
+
+These commands are available only when `TSEssentials-Permissions-<version>.jar` is present beside the core TSEssentials plugin JAR.
+
+-   `/tsperm`
+    -   **Description:** Opens the permissions admin UI.
+-   `/tsperm group list`
+    -   **Description:** Lists local TSE permissions groups.
+-   `/tsperm group create <group> [display-name]`
+    -   **Description:** Creates a local permissions group.
+-   `/tsperm group delete <group>`
+    -   **Description:** Deletes a local permissions group and removes it from user records.
+-   `/tsperm group addnode <group> <node>`
+    -   **Description:** Adds a permission node to a group.
+-   `/tsperm group removenode <group> <node>`
+    -   **Description:** Removes a permission node from a group.
+-   `/tsperm user groups <player-or-uuid>`
+    -   **Description:** Shows local TSE group memberships.
+-   `/tsperm user addgroup <player-or-uuid> <group>`
+    -   **Description:** Adds a player to a local group.
+-   `/tsperm user removegroup <player-or-uuid> <group>`
+    -   **Description:** Removes a player from a local group.
+-   `/tsperm test <player-or-uuid> <node>`
+    -   **Description:** Tests the local TSE provider's effective permission result.
+-   `/tsperm reload`
+    -   **Description:** Reloads local permissions configs.
 
 ## Configuration Files
 
@@ -188,10 +216,22 @@ This file stores the single, global server spawn point.
 {}
 ```
 
-## Permissions
+## Optional Permissions Module
 
-*(Note: This is a planned feature and not yet implemented)*
+The permissions module builds separately from the core plugin:
 
-Future versions of this plugin will include a permissions system to control who can use certain commands. For example:
--   `tsessentials.setwarp`: Allows a user to create and update warps. (Default: OP only)
--   `tsessentials.home.multiple`: Allows a user to set multiple homes up to the configured limit.
+```bash
+mvn clean install
+mvn -f modules/permissions/pom.xml clean package
+```
+
+Deploy `target/TSEssentials-<version>.jar` to the server mods directory. Deploy optional module JARs into a `TSEssentialsModules` folder beside the core plugin JAR, for example `UserData/Mods/TSEssentialsModules/TSEssentials-Permissions-<version>.jar`. The permissions module is a plain JAR with no Hytale `manifest.json`; core TSEssentials discovers it through Java `ServiceLoader`.
+
+The module stores authoritative data in codec-backed JSON files under the core plugin data directory's `modules/permissions` folder:
+
+-   `permissions_groups.json`: Local group definitions and permission nodes.
+-   `permissions_users.json`: UUID-keyed group memberships and last-known usernames.
+
+Player ECS data is only an online mirror of group memberships. Removing the permissions module JAR leaves the JSON files untouched, and core TSEssentials continues to boot without the module.
+
+The permissions admin page is registered by the optional module, but its `PermissionsAdmin.ui` document is packaged with the core plugin resources because Hytale Custom UI document lookup does not resolve resources from child-loaded optional module JARs. The CLI commands remain the supported fallback if custom UI loading changes in a future runtime.

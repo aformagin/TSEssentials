@@ -1,6 +1,11 @@
 package com.thirdspare;
 
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.event.EventRegistry;
+import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
@@ -30,10 +35,16 @@ import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.events.chat.ChatListener;
 import com.thirdspare.homes.HomeService;
 import com.thirdspare.homes.PlayerHomesComponent;
+import com.thirdspare.modules.api.TSEModuleContext;
+import com.thirdspare.modules.api.TSEModuleDescriptor;
+import com.thirdspare.modules.core.ModuleLoader;
+import com.thirdspare.modules.core.ModulePaths;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequestManager;
 
 import javax.annotation.Nonnull;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 public class TSEssentials extends JavaPlugin {
@@ -71,6 +82,7 @@ public class TSEssentials extends JavaPlugin {
     private EconomyManager economyManager;
     private EconomyService economyService;
     private TeleportRequestManager teleportRequestManager;
+    private ModuleLoader moduleLoader;
 
     public TSEssentials(@Nonnull JavaPluginInit init) {
         super(init);
@@ -123,6 +135,14 @@ public class TSEssentials extends JavaPlugin {
         this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
                 TSEssentialsPermissions.COMMAND_WILDCARD);
 
+        moduleLoader = new ModuleLoader(
+                ModulePaths.defaultModulesDirectory(this),
+                getClassLoader(),
+                getLogger(),
+                this::createModuleContext
+        );
+        moduleLoader.discoverAndRegister();
+
         /* Initialize TPA request manager */
         teleportRequestManager = new TeleportRequestManager();
 
@@ -165,8 +185,110 @@ public class TSEssentials extends JavaPlugin {
             ExampleEvent.onPlayerReady(event);
             chatService.loadSettings(event.getPlayer().getPlayerRef());
             economyService.loadEconomy(event.getPlayer().getPlayerRef());
+            moduleLoader.onPlayerReady(event.getPlayer().getPlayerRef());
         });
         this.getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener(chatService)::onPlayerChat);
+
+        moduleLoader.enableAll();
+    }
+
+    @Override
+    protected void shutdown() {
+        if (moduleLoader != null) {
+            moduleLoader.disableAll();
+        }
+    }
+
+    public <T> Config<T> registerModuleConfig(String key, BuilderCodec<T> codec) {
+        return withConfig(key, codec);
+    }
+
+    public <T extends Component<EntityStore>> ComponentType<EntityStore, T> registerModuleComponent(
+            Class<T> type,
+            String componentId,
+            BuilderCodec<T> codec
+    ) {
+        return getEntityStoreRegistry().registerComponent(type, componentId, codec);
+    }
+
+    public void registerModuleCommand(AbstractCommand command) {
+        getCommandRegistry().registerCommand(command);
+    }
+
+    public ModuleLoader getModuleLoader() {
+        return moduleLoader;
+    }
+
+    private TSEModuleContext createModuleContext(Path jarPath, TSEModuleDescriptor descriptor) {
+        Path dataDirectory = ModulePaths.dataDirectory(this, descriptor.id());
+        try {
+            Files.createDirectories(dataDirectory);
+        } catch (Exception ex) {
+            getLogger().at(Level.WARNING).log("Unable to create module data directory " + dataDirectory + ": " + ex.getMessage());
+        }
+        return new CoreModuleContext(jarPath, dataDirectory);
+    }
+
+    private final class CoreModuleContext implements TSEModuleContext {
+        private final Path moduleJarPath;
+        private final Path moduleDataDirectory;
+
+        private CoreModuleContext(Path moduleJarPath, Path moduleDataDirectory) {
+            this.moduleJarPath = moduleJarPath;
+            this.moduleDataDirectory = moduleDataDirectory;
+        }
+
+        @Override
+        public TSEssentials core() {
+            return TSEssentials.this;
+        }
+
+        @Override
+        public HytaleLogger logger() {
+            return getLogger();
+        }
+
+        @Override
+        public Path moduleJarPath() {
+            return moduleJarPath;
+        }
+
+        @Override
+        public Path moduleDataDirectory() {
+            return moduleDataDirectory;
+        }
+
+        @Override
+        public <T> Config<T> registerConfig(String key, BuilderCodec<T> codec) {
+            Config<T> config = new Config<>(moduleDataDirectory, key, codec);
+            try {
+                config.load().join();
+            } catch (RuntimeException ex) {
+                getLogger().at(Level.WARNING).log("Unable to load module config '" + key +
+                        "' from " + moduleDataDirectory + ": " + ex.getMessage());
+                throw ex;
+            }
+            return config;
+        }
+
+        @Override
+        public <T extends Component<EntityStore>> ComponentType<EntityStore, T> registerComponent(
+                Class<T> type,
+                String componentId,
+                BuilderCodec<T> codec
+        ) {
+            return registerModuleComponent(type, componentId, codec);
+        }
+
+        @Override
+        public void registerCommand(AbstractCommand command) {
+            registerModuleCommand(command);
+        }
+
+        @Override
+        public EventRegistry eventRegistry() {
+            return getEventRegistry();
+        }
     }
 
     /**
