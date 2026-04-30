@@ -12,8 +12,8 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
 -   **Economy System (V1):** Digital currency system with player accounts, admin management, and an in-game UI.
 -   **Modular Extensions:** Optional drop-in modules for enhanced functionality without core plugin bloat.
-    -   **Chat Channels:** Modularized organization for communication with joinable channels, local range support, and nicknames.
-    -   **Permissions:** Drop-in management for groups, nodes, and memberships with an in-game admin UI.
+    -   **Chat Channels (V1):** Modularized organization for communication with joinable channels, local range support, and nicknames.
+    -   **Permissions (V1):** Drop-in management for groups, nodes, and memberships with an in-game admin UI.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
 -   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
 -   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
@@ -69,6 +69,15 @@ The core plugin automatically scans the `TSEssentialsModules` directory for any 
     -   **Description:** Sets the server's global spawn point.
 -   `/spawn`
     -   **Description:** Teleports a player to the server's global spawn point.
+
+### Utility Commands
+
+-   `/heal [player]`
+    -   **Description:** Restores a player's health to full. If no player is specified, heals the sender.
+-   `/repair`
+    -   **Description:** Repairs the item currently held in the player's hand.
+-   `/repairall`
+    -   **Description:** Repairs all repairable items in the player's inventory, including hotbar, armor, and backpack.
 
 ### Teleport Request (TPA) Commands
 

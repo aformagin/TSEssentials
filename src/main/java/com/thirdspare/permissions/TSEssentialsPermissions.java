@@ -14,6 +14,10 @@ public final class TSEssentialsPermissions {
     public static final String TP_ACCEPT = "tsessentials.command.tpaccept";
     public static final String TP_DENY = "tsessentials.command.tpdeny";
     public static final String TP_HERE = "tsessentials.command.tphere";
+    public static final String HEAL = "tsessentials.command.heal";
+    public static final String HEAL_OTHERS = "tsessentials.command.heal.others";
+    public static final String REPAIR = "tsessentials.command.repair";
+    public static final String REPAIR_ALL = "tsessentials.command.repairall";
     public static final String BALANCE = "tsessentials.command.balance";
     public static final String BALANCE_OTHERS = "tsessentials.command.balance.others";
     public static final String PAY = "tsessentials.command.pay";

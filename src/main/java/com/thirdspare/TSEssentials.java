@@ -137,6 +137,9 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new TpAcceptCommand("tpaccept", "Accept a pending teleport request", this));
         this.getCommandRegistry().registerCommand(new TpDenyCommand("tpdeny", "Deny a pending teleport request", this));
         this.getCommandRegistry().registerCommand(new TpHereCommand("tphere", "Force teleport a player to you (admin)", this));
+        this.getCommandRegistry().registerCommand(new HealCommand());
+        this.getCommandRegistry().registerCommand(new RepairCommand());
+        this.getCommandRegistry().registerCommand(new RepairAllCommand());
 
         this.getCommandRegistry().registerCommand(new BalanceCommand(economyService));
         this.getCommandRegistry().registerCommand(new PayCommand(economyService));
