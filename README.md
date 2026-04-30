@@ -6,23 +6,26 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 
 ## Features
 
--   **Personal Homes:** Allows players to set one or more personal "home" locations that they can teleport back to at any time. The number of homes a player can set is configurable.
--   **Server Warps:** Enables server administrators to create a network of server-wide warp points, facilitating easy travel to key locations like cities, dungeons, or event areas.
+-   **Personal Homes:** Allows players to set one or more personal "home" locations.
+-   **Server Warps:** Enables server administrators to create a network of server-wide warp points.
 -   **Server Spawn:** A global spawn point that any player can teleport to.
--   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
--   **Economy System (V1):** Digital currency system with player accounts, admin management, and an in-game UI.
--   **Modular Extensions:** Optional drop-in modules for enhanced functionality without core plugin bloat.
-    -   **Chat Channels (V1):** Modularized organization for communication with joinable channels, local range support, and nicknames.
-    -   **Permissions (V1):** Drop-in management for groups, nodes, and memberships with an in-game admin UI.
--   **Land Claims (Planned):** Robust protection system to prevent griefing.
--   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
--   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
--   **Simple Commands:** Intuitive and easy-to-use commands for all teleportation features.
--   **Configuration:** All data is stored in simple JSON files, making it easy to view, edit, or reset data if needed.
+-   **Teleport Requests (TPA):** Players can request to teleport to each other.
+-   **Economy System (V1):** Digital currency system with player accounts and admin management.
+-   **Modular Extensions:** Optional drop-in modules for enhanced functionality.
+    -   **Chat Channels (V1):** Joinable channels, range support, and nicknames.
+    -   **Permissions (V1):** Group/node management with an in-game admin UI.
+-   **Utility Tools:** Core commands for healing and item repair.
+-   **Concurrency & Safety:** World-thread safe commands.
+-   **Configuration:** Data stored in simple, human-readable JSON files.
+
+## Documentation
+
+-   [**Command Reference**](COMMANDS.md): Detailed information on all core and modular commands.
+-   [**Permissions Progress Report**](Research/Planning%20Documents/Permissions%20Progress%20Report.md): Detailed implementation status of the modular systems.
 
 ## TSEssentials Module System
 
-TSEssentials features a robust, optional module system that allows for additive functionality. Modules are plain JAR files discovered and loaded at runtime.
+TSEssentials features a robust, optional module system that allows for additive functionality.
 
 ### Drop-in Modules
 
@@ -37,76 +40,6 @@ To install an optional module:
 | :--- | :--- | :--- |
 | **Chat** | Multi-channel chat, range-based local chat, nicknames, and mutes. | `mvn -f modules/chat/pom.xml clean package` |
 | **Permissions** | Group-based permissions, user records, and an in-game admin UI. | `mvn -f modules/permissions/pom.xml clean package` |
-
-### Discovery & Lifecycle
-
-The core plugin automatically scans the `TSEssentialsModules` directory for any JAR files starting with `TSEssentials-`. Each module undergoes a strict lifecycle:
--   **Discovery:** JARs are identified and loaded into isolated classloaders.
--   **Registration:** Modules receive a `TSEModuleContext` to register their own configurations, commands, and ECS components.
--   **Enablement:** Modules are enabled after the core plugin has finished its own initialization.
--   **Player Sync:** Modules are notified when a player is ready, allowing for dynamic data synchronization.
--   **Shutdown:** Modules are cleanly disabled when the server stops, ensuring data integrity.
-
-## Commands
-
-### Home Commands
-
--   `/sethome [home-name]`
-    -   **Description:** Sets a player's home at their current location.
--   `/home [home-name]`
-    -   **Description:** Teleports a player to their set home.
-
-### Warp Commands
-
--   `/setwarp <warp-name>`
-    -   **Description:** Creates or updates a server-wide warp point.
--   `/warp <warp-name>`
-    -   **Description:** Teleports a player to the specified server warp.
-
-### Spawn Commands
-
--   `/setspawn`
-    -   **Description:** Sets the server's global spawn point.
--   `/spawn`
-    -   **Description:** Teleports a player to the server's global spawn point.
-
-### Utility Commands
-
--   `/heal [player]`
-    -   **Description:** Restores a player's health to full. If no player is specified, heals the sender.
--   `/repair`
-    -   **Description:** Repairs the item currently held in the player's hand.
--   `/repairall`
-    -   **Description:** Repairs all repairable items in the player's inventory, including hotbar, armor, and backpack.
-
-### Teleport Request (TPA) Commands
-
--   `/tpa <player>`, `/tpahere <player>`, `/tpaccept`, `/tpdeny`
-    -   **Note:** Teleport requests expire after 120 seconds.
-
-### Economy Commands
-
--   `/balance [player]`, `/pay <player> <amount>`, `/eco <give|take|set> <player> <amount>`
--   `/wallet`, `/econadmin` (UI-based management)
-
-### Optional Chat Module Commands
-
-*Available only when `TSEssentials-Chat-<version>.jar` is present.*
-
--   `/ch <channel-name>`: Sets focus channel.
--   `/ch join <channel-name>`: Joins a channel.
--   `/ch leave <channel-name>`: Leaves a channel.
--   `/nick <nickname>`: Sets your display name.
--   `/ignore <player>`: Mutes a player.
-
-### Optional Permissions Module Commands
-
-*Available only when `TSEssentials-Permissions-<version>.jar` is present.*
-
--   `/tsperm`: Opens the permissions admin UI.
--   `/tsperm group <list|create|delete|addnode|removenode>`: Manage groups.
--   `/tsperm user <groups|addgroup|removegroup>`: Manage user memberships.
--   `/tsperm test <player> <node>`: Test effective permissions.
 
 ## Configuration Files
 
