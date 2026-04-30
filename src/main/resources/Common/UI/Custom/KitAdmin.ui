@@ -1,0 +1,171 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+@SectionTitle = Label {
+  Anchor: (Height: 24, Bottom: 7);
+  Style: (FontSize: 13, RenderBold: true, RenderUppercase: true, TextColor: #f1ba50, VerticalAlignment: Center);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #KitAdminPanel {
+    Anchor: (Width: 1160, Height: 760);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "Kit Admin";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 460, Height: 34);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      LayoutMode: Left;
+
+      Group #LeftPane {
+        Anchor: (Width: 340);
+        Background: #252525(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 14);
+
+        @SectionTitle { Text: "Kits"; }
+
+        Group #KitList {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Padding: (Right: 6);
+
+          $C.@TextButton #KitRow0 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow1 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow2 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow3 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow4 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow5 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow6 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow7 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow8 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #KitRow9 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+        }
+
+        @FieldLabel { Text: "New Kit Name"; }
+        $C.@TextField #CreateNameInput { @Anchor = (Height: 36, Bottom: 10); }
+
+        $C.@TextButton #CreateButton {
+          @Anchor = (Height: 38);
+          Text: "+ Add Kit";
+        }
+      }
+
+      Group #RightPane {
+        FlexWeight: 1;
+        Background: #414141(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 20);
+
+        Label #SelectedTitle {
+          Anchor: (Height: 36, Bottom: 10);
+          Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "No kit selected";
+        }
+
+        Group #Columns {
+          FlexWeight: 1;
+          LayoutMode: Left;
+
+          Group #DetailsPane {
+            FlexWeight: 1;
+            LayoutMode: Top;
+            Padding: (Right: 12);
+
+            @SectionTitle { Text: "Details"; }
+            @FieldLabel { Text: "Name"; }
+            $C.@TextField #NameInput { @Anchor = (Height: 36, Bottom: 8); }
+
+            @FieldLabel { Text: "Display Name"; }
+            $C.@TextField #DisplayNameInput { @Anchor = (Height: 36, Bottom: 8); }
+
+            @FieldLabel { Text: "Description"; }
+            $C.@TextField #DescriptionInput { @Anchor = (Height: 36, Bottom: 8); }
+
+            @FieldLabel { Text: "Permission"; }
+            $C.@TextField #PermissionInput { @Anchor = (Height: 36, Bottom: 8); }
+
+            @FieldLabel { Text: "Cooldown Seconds"; }
+            $C.@NumberField #CooldownInput { @Anchor = (Height: 36, Bottom: 10); }
+
+            Group #EnabledRow {
+              Anchor: (Height: 38, Bottom: 12);
+              LayoutMode: Left;
+              $C.@CheckBox #EnabledCheck { Anchor: (Width: 24, Height: 24, Right: 10); }
+              Label { FlexWeight: 1; Text: "Kit enabled"; Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center); }
+            }
+          }
+
+          Group #ItemsPane {
+            FlexWeight: 1;
+            LayoutMode: Top;
+            Padding: (Left: 12);
+
+            @SectionTitle { Text: "Items"; }
+            @FieldLabel { Text: "Item"; }
+            $C.@DropdownBox #ItemDropdown {
+              @Anchor = (Height: 36, Bottom: 8);
+              ShowSearchInput: false;
+              MaxSelection: 1;
+            }
+
+            @FieldLabel { Text: "Quantity"; }
+            $C.@NumberField #QuantityInput { @Anchor = (Height: 36, Bottom: 8); Value: 1; }
+
+            Group #ItemButtons {
+              Anchor: (Height: 38, Bottom: 12);
+              LayoutMode: Left;
+              $C.@TextButton #AddItemButton { @Anchor = (Width: 128, Right: 8); Text: "Add Item"; }
+              $C.@CancelTextButton #ClearItemsButton { @Anchor = (Width: 150); Text: "Clear Items"; }
+            }
+
+            Label #ItemRow0 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow1 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow2 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow3 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow4 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow5 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow6 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+            Label #ItemRow7 { Anchor: (Height: 28, Bottom: 3); Text: ""; Visible: false; Style: (FontSize: 13, TextColor: #ffffff, VerticalAlignment: Center); }
+          }
+        }
+
+        Group #Actions {
+          Anchor: (Height: 46, Top: 14);
+          LayoutMode: Right;
+
+          $C.@TextButton #SaveButton { @Anchor = (Width: 150, Right: 8); Text: "Save"; }
+          $C.@CancelTextButton #DeleteButton { @Anchor = (Width: 150); Text: "Delete"; }
+        }
+      }
+    }
+  }
+}

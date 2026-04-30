@@ -1,0 +1,64 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #RulesAdminPanel {
+    Anchor: (Width: 920, Height: 560);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "Rules Admin";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 360, Height: 34);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      Background: #414141(0.92);
+      LayoutMode: Top;
+      Padding: (Full: 22);
+
+      @FieldLabel { Text: "Rules Title"; }
+      $C.@TextField #TitleInput { @Anchor = (Height: 38, Bottom: 14); }
+
+      @FieldLabel { Text: "Rules"; }
+      $C.@TextField #RulesInput { @Anchor = (Height: 40, Bottom: 12); }
+
+      Label {
+        FlexWeight: 1;
+        Text: "Use one line of text or paste multiple lines if supported by your client. Command fallback also supports /rulesadmin set rule one | rule two.";
+        Style: (FontSize: 13, TextColor: #cccccc, VerticalAlignment: Top, Wrap: true);
+      }
+
+      Group #Actions {
+        Anchor: (Height: 46, Top: 16);
+        LayoutMode: Right;
+        $C.@TextButton #SaveButton { @Anchor = (Width: 150); Text: "Save"; }
+      }
+    }
+  }
+}

@@ -13,11 +13,24 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.commands.*;
+import com.thirdspare.commands.core.*;
 import com.thirdspare.commands.economy.BalanceCommand;
 import com.thirdspare.commands.economy.EcoCommand;
 import com.thirdspare.commands.economy.EconAdminUICommand;
 import com.thirdspare.commands.economy.WalletCommand;
 import com.thirdspare.commands.economy.PayCommand;
+import com.thirdspare.core.back.BackService;
+import com.thirdspare.core.flight.FlightService;
+import com.thirdspare.core.kits.KitManager;
+import com.thirdspare.core.kits.KitService;
+import com.thirdspare.core.kits.data.KitsConfig;
+import com.thirdspare.core.motd.MotdManager;
+import com.thirdspare.core.motd.data.MotdConfig;
+import com.thirdspare.core.nearby.NearbyService;
+import com.thirdspare.core.position.PositionService;
+import com.thirdspare.core.rules.RulesManager;
+import com.thirdspare.core.rules.data.RulesConfig;
+import com.thirdspare.core.teleport.TeleportAllService;
 import com.thirdspare.data.economy.EconomyAccountsConfig;
 import com.thirdspare.data.economy.EconomyConfig;
 import com.thirdspare.data.PlayerDataConfig;
@@ -35,6 +48,7 @@ import com.thirdspare.modules.core.ModuleLoader;
 import com.thirdspare.modules.core.ModulePaths;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.tpa.TeleportRequestManager;
+import com.thirdspare.utils.Teleportation;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
@@ -57,6 +71,9 @@ public class TSEssentials extends JavaPlugin {
     /* Economy configuration and known account ledger */
     private final Config<EconomyConfig> economyConfig = withConfig("economy_config", EconomyConfig.CODEC);
     private final Config<EconomyAccountsConfig> economyAccountsConfig = withConfig("economy_accounts", EconomyAccountsConfig.CODEC);
+    private final Config<MotdConfig> motdConfig = withConfig("motd_config", MotdConfig.CODEC);
+    private final Config<RulesConfig> rulesConfig = withConfig("rules_config", RulesConfig.CODEC);
+    private final Config<KitsConfig> kitsConfig = withConfig("kits_config", KitsConfig.CODEC);
 
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
@@ -68,6 +85,15 @@ public class TSEssentials extends JavaPlugin {
     private HomeService homeService;
     private EconomyManager economyManager;
     private EconomyService economyService;
+    private MotdManager motdManager;
+    private RulesManager rulesManager;
+    private KitManager kitManager;
+    private KitService kitService;
+    private NearbyService nearbyService;
+    private PositionService positionService;
+    private FlightService flightService;
+    private BackService backService;
+    private TeleportAllService teleportAllService;
     private TeleportRequestManager teleportRequestManager;
     private ModuleLoader moduleLoader;
 
@@ -111,6 +137,17 @@ public class TSEssentials extends JavaPlugin {
         this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
                 TSEssentialsPermissions.COMMAND_WILDCARD);
 
+        motdManager = new MotdManager(motdConfig, motdConfig.get());
+        rulesManager = new RulesManager(rulesConfig, rulesConfig.get());
+        kitManager = new KitManager(kitsConfig, kitsConfig.get());
+        kitService = new KitService(kitManager);
+        nearbyService = new NearbyService();
+        positionService = new PositionService();
+        flightService = new FlightService();
+        backService = new BackService();
+        teleportAllService = new TeleportAllService();
+        Teleportation.setBackService(backService);
+
         moduleLoader = new ModuleLoader(
                 ModulePaths.defaultModulesDirectory(this),
                 getClassLoader(),
@@ -140,6 +177,17 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new HealCommand());
         this.getCommandRegistry().registerCommand(new RepairCommand());
         this.getCommandRegistry().registerCommand(new RepairAllCommand());
+        this.getCommandRegistry().registerCommand(new MotdCommand(motdManager));
+        this.getCommandRegistry().registerCommand(new MotdAdminCommand(motdManager));
+        this.getCommandRegistry().registerCommand(new NearbyCommand(nearbyService));
+        this.getCommandRegistry().registerCommand(new KitCommand(kitService));
+        this.getCommandRegistry().registerCommand(new KitAdminCommand(kitService));
+        this.getCommandRegistry().registerCommand(new GetPosCommand(positionService));
+        this.getCommandRegistry().registerCommand(new RulesCommand(rulesManager));
+        this.getCommandRegistry().registerCommand(new RulesAdminCommand(rulesManager));
+        this.getCommandRegistry().registerCommand(new FlyCommand(flightService));
+        this.getCommandRegistry().registerCommand(new BackCommand(backService));
+        this.getCommandRegistry().registerCommand(new TpAllCommand(teleportAllService));
 
         this.getCommandRegistry().registerCommand(new BalanceCommand(economyService));
         this.getCommandRegistry().registerCommand(new PayCommand(economyService));
@@ -151,6 +199,7 @@ public class TSEssentials extends JavaPlugin {
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
             ExampleEvent.onPlayerReady(event);
             economyService.loadEconomy(event.getPlayer().getPlayerRef());
+            motdManager.sendTo(event.getPlayer().getPlayerRef(), false);
             moduleLoader.onPlayerReady(event.getPlayer().getPlayerRef());
         });
         this.getEventRegistry().registerGlobal(PlayerChatEvent.class, event -> moduleLoader.onPlayerChat(event));

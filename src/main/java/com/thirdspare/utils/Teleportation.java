@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.thirdspare.core.back.BackService;
 
 import java.util.UUID;
 
@@ -16,6 +17,29 @@ import java.util.UUID;
  * Utility class for player teleportation operations
  */
 public class Teleportation {
+    private static BackService backService;
+
+    public static void setBackService(BackService service) {
+        backService = service;
+    }
+
+    public static void teleportPlayer(PlayerRef playerRef, double x, double y, double z,
+                                      float pitch, float yaw, float roll,
+                                      UUID worldUUID, String reason) {
+        recordBack(playerRef, reason);
+        teleportPlayerWithoutBackCapture(playerRef, x, y, z, pitch, yaw, roll, worldUUID);
+    }
+
+    public static void teleportPlayer(PlayerRef playerRef, double x, double y, double z,
+                                      UUID worldUUID, String reason) {
+        recordBack(playerRef, reason);
+        teleportPlayerWithoutBackCapture(playerRef, x, y, z, worldUUID);
+    }
+
+    public static void teleportPlayer(PlayerRef playerRef, Transform transform, UUID worldUUID, String reason) {
+        recordBack(playerRef, reason);
+        teleportPlayerWithoutBackCapture(playerRef, transform, worldUUID);
+    }
 
     /**
      * Teleport a player to a specific location with rotation
@@ -32,6 +56,12 @@ public class Teleportation {
     public static void teleportPlayer(PlayerRef playerRef, double x, double y, double z,
                                       float pitch, float yaw, float roll,
                                       UUID worldUUID) {
+        teleportPlayer(playerRef, x, y, z, pitch, yaw, roll, worldUUID, "teleport");
+    }
+
+    public static void teleportPlayerWithoutBackCapture(PlayerRef playerRef, double x, double y, double z,
+                                                        float pitch, float yaw, float roll,
+                                                        UUID worldUUID) {
         World world = Universe.get().getWorld(worldUUID);
 
         if (world == null) {
@@ -63,6 +93,10 @@ public class Teleportation {
      * @param worldUUID The UUID of the world to teleport to
      */
     public static void teleportPlayer(PlayerRef playerRef, double x, double y, double z, UUID worldUUID) {
+        teleportPlayer(playerRef, x, y, z, worldUUID, "teleport");
+    }
+
+    public static void teleportPlayerWithoutBackCapture(PlayerRef playerRef, double x, double y, double z, UUID worldUUID) {
         World world = Universe.get().getWorld(worldUUID);
         if (world == null) {
             return;
@@ -92,6 +126,10 @@ public class Teleportation {
      * @param worldUUID The UUID of the world to teleport to
      */
     public static void teleportPlayer(PlayerRef playerRef, Transform transform, UUID worldUUID) {
+        teleportPlayer(playerRef, transform, worldUUID, "teleport");
+    }
+
+    public static void teleportPlayerWithoutBackCapture(PlayerRef playerRef, Transform transform, UUID worldUUID) {
         World world = Universe.get().getWorld(worldUUID);
         if (world == null) {
             return;
@@ -105,5 +143,15 @@ public class Teleportation {
             Teleport teleport = new Teleport(transform.getPosition(), transform.getRotation());
             store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
         });
+    }
+
+    public static void teleportPlayerWithoutBackCapture(PlayerRef playerRef, Vector3d position, Vector3f rotation, UUID worldUUID) {
+        teleportPlayerWithoutBackCapture(playerRef, new Transform(position, rotation), worldUUID);
+    }
+
+    private static void recordBack(PlayerRef playerRef, String reason) {
+        if (backService != null) {
+            backService.recordBeforeTeleport(playerRef, reason);
+        }
     }
 }
