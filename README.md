@@ -10,9 +10,10 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Server Warps:** Enables server administrators to create a network of server-wide warp points, facilitating easy travel to key locations like cities, dungeons, or event areas.
 -   **Server Spawn:** A global spawn point that any player can teleport to.
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
--   **Optional Chat Module:** Drop-in plain-JAR module for chat channels, focused chat, local/staff chat, ignores, nicknames, and the chat editor UI.
 -   **Economy System (V1):** Digital currency system with player accounts, admin management, and an in-game UI.
--   **Optional Permissions Module:** Drop-in plain-JAR module for TSEssentials-managed groups, permission nodes, memberships, and an in-game admin UI. It is additive and does not replace Hytale's default permission provider.
+-   **Modular Extensions:** Optional drop-in modules for enhanced functionality without core plugin bloat.
+    -   **Chat Channels:** Modularized organization for communication with joinable channels, local range support, and nicknames.
+    -   **Permissions:** Drop-in management for groups, nodes, and memberships with an in-game admin UI.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
 -   **Concurrency & Safety:** All commands have been updated to be world-thread safe, ensuring stability and preventing race conditions even under heavy server load.
 -   **Admin Teleport:** Administrators can force-teleport players to their location instantly.
@@ -21,14 +22,21 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 
 ## TSEssentials Module System
 
-TSEssentials features a robust, optional module system that allows for additive functionality without bloating the core plugin. Modules are plain JAR files that are discovered and loaded at runtime.
+TSEssentials features a robust, optional module system that allows for additive functionality. Modules are plain JAR files discovered and loaded at runtime.
 
 ### Drop-in Modules
 
 To install an optional module:
-1.  Create a folder named `TSEssentialsModules` in the server's `UserData/Mods/` directory (beside the main `TSEssentials.jar`).
-2.  Drop the module JAR (e.g., `TSEssentials-Permissions-1.1.0.jar`) into this folder.
+1.  Create a folder named `TSEssentialsModules` in the server's `/Mods/` directory or client's `/UserData/Mods/` directory (beside the main `TSEssentials.jar`).
+2.  Drop the module JAR (e.g., `TSEssentials-Chat-1.0.jar`) into this folder.
 3.  Restart the server.
+
+### Available Optional Modules
+
+| Module | Description | Build Command |
+| :--- | :--- | :--- |
+| **Chat** | Multi-channel chat, range-based local chat, nicknames, and mutes. | `mvn -f modules/chat/pom.xml clean package` |
+| **Permissions** | Group-based permissions, user records, and an in-game admin UI. | `mvn -f modules/permissions/pom.xml clean package` |
 
 ### Discovery & Lifecycle
 
@@ -39,182 +47,69 @@ The core plugin automatically scans the `TSEssentialsModules` directory for any 
 -   **Player Sync:** Modules are notified when a player is ready, allowing for dynamic data synchronization.
 -   **Shutdown:** Modules are cleanly disabled when the server stops, ensuring data integrity.
 
-### Developer API
-
-Developers can create their own modules by implementing the `TSEModule` interface and providing a `TSEModuleDescriptor`. Access to core services is provided through the `TSEModuleContext`, which includes:
--   **Config Registration:** Simple, codec-backed JSON configuration management.
--   **Command Registration:** Integration with Hytale's command system.
--   **ECS Component Registration:** Support for custom player or entity data.
--   **Event Access:** Access to the global `EventRegistry`.
-
 ## Commands
 
 ### Home Commands
 
 -   `/sethome [home-name]`
-    -   **Description:** Sets a player's home at their current location. If no `home-name` is provided, it sets the default home.
-    -   **Usage:** Stand at the desired location and type `/sethome` or `/sethome mybase`.
+    -   **Description:** Sets a player's home at their current location.
 -   `/home [home-name]`
-    -   **Description:** Teleports a player to their set home. If no `home-name` is provided, it teleports them to their default home.
-    -   **Usage:** `/home` or `/home mybase`.
--   **Note:** The maximum number of homes a player can set is configurable in `player_data.json`.
+    -   **Description:** Teleports a player to their set home.
 
 ### Warp Commands
 
 -   `/setwarp <warp-name>`
-    -   **Description:** Creates or updates a server-wide warp point at the player's current location. This command typically requires administrative privileges.
-    -   **Usage:** `/setwarp spawn`.
+    -   **Description:** Creates or updates a server-wide warp point.
 -   `/warp <warp-name>`
     -   **Description:** Teleports a player to the specified server warp.
-    -   **Usage:** `/warp spawn`.
 
 ### Spawn Commands
 
 -   `/setspawn`
-    -   **Description:** Sets the server's global spawn point at your current location. This command typically requires administrative privileges.
-    -   **Usage:** Stand at the desired location and type `/setspawn`.
+    -   **Description:** Sets the server's global spawn point.
 -   `/spawn`
     -   **Description:** Teleports a player to the server's global spawn point.
-    -   **Usage:** `/spawn`.
 
 ### Teleport Request (TPA) Commands
 
--   `/tpa <player>`
-    -   **Description:** Sends a request to teleport to another player. The target player must accept the request before the teleport occurs.
-    -   **Usage:** `/tpa Steve`
--   `/tpahere <player>`
-    -   **Description:** Sends a request for another player to teleport to you. The target player must accept the request before the teleport occurs.
-    -   **Usage:** `/tpahere Steve`
--   `/tpaccept`
-    -   **Description:** Accepts the most recent pending teleport request.
-    -   **Usage:** `/tpaccept`
--   `/tpdeny`
-    -   **Description:** Denies the most recent pending teleport request.
-    -   **Usage:** `/tpdeny`
--   **Note:** Teleport requests expire after 120 seconds. Only one request per sender-target pair is active at a time; sending a new request replaces any existing one.
-
-### Chat Commands
-
--   `/ch <channel-name>`
-    -   **Description:** Sets your focus to the specified channel. Any messages you type will be sent there by default.
-    -   **Usage:** `/ch global` or `/ch local`
--   `/ch join <channel-name>`
-    -   **Description:** Joins a channel so you can receive its messages.
-    -   **Usage:** `/ch join staff`
--   `/ch leave <channel-name>`
-    -   **Description:** Leaves a channel.
-    -   **Usage:** `/ch leave global`
--   `/nick <nickname>`
-    -   **Description:** Sets your display name on the server.
-    -   **Usage:** `/nick SuperSteve`
--   `/ignore <player>`
-    -   **Description:** Mutes messages from the specified player.
-    -   **Usage:** `/ignore GrieferDan`
+-   `/tpa <player>`, `/tpahere <player>`, `/tpaccept`, `/tpdeny`
+    -   **Note:** Teleport requests expire after 120 seconds.
 
 ### Economy Commands
 
--   `/balance [player]`
-    -   **Description:** Checks your current balance or the balance of another player.
--   `/pay <player> <amount>`
-    -   **Description:** Sends money to another player.
--   `/eco <give|take|set> <player> <amount>`
-    -   **Description:** Admin command to manage player balances.
--   `/wallet`
-    -   **Description:** Opens the player economy UI.
--   `/econadmin`
-    -   **Description:** Opens the admin economy management UI.
+-   `/balance [player]`, `/pay <player> <amount>`, `/eco <give|take|set> <player> <amount>`
+-   `/wallet`, `/econadmin` (UI-based management)
 
-### Admin Commands
+### Optional Chat Module Commands
 
--   `/tphere <player>`
-    -   **Description:** Instantly teleports the specified player to your current location. No request or confirmation is needed.
-    -   **Usage:** `/tphere Steve`
+*Available only when `TSEssentials-Chat-<version>.jar` is present.*
+
+-   `/ch <channel-name>`: Sets focus channel.
+-   `/ch join <channel-name>`: Joins a channel.
+-   `/ch leave <channel-name>`: Leaves a channel.
+-   `/nick <nickname>`: Sets your display name.
+-   `/ignore <player>`: Mutes a player.
 
 ### Optional Permissions Module Commands
 
-These commands are available only when `TSEssentials-Permissions-<version>.jar` is present in `UserData/Mods/TSEssentialsModules`.
+*Available only when `TSEssentials-Permissions-<version>.jar` is present.*
 
--   `/tsperm`
-    -   **Description:** Opens the permissions admin UI.
--   `/tsperm group list`
-    -   **Description:** Lists local TSE permissions groups.
--   `/tsperm group create <group> [display-name]`
-    -   **Description:** Creates a local permissions group.
--   `/tsperm group delete <group>`
-    -   **Description:** Deletes a local permissions group and removes it from user records.
--   `/tsperm group addnode <group> <node>`
-    -   **Description:** Adds a permission node to a group.
--   `/tsperm group removenode <group> <node>`
-    -   **Description:** Removes a permission node from a group.
--   `/tsperm user groups <player-or-uuid>`
-    -   **Description:** Shows local TSE group memberships.
--   `/tsperm user addgroup <player-or-uuid> <group>`
-    -   **Description:** Adds a player to a local group.
--   `/tsperm user removegroup <player-or-uuid> <group>`
-    -   **Description:** Removes a player from a local group.
--   `/tsperm test <player-or-uuid> <node>`
-    -   **Description:** Tests the local TSE provider's effective permission result.
--   `/tsperm reload`
-    -   **Description:** Reloads local permissions configs.
+-   `/tsperm`: Opens the permissions admin UI.
+-   `/tsperm group <list|create|delete|addnode|removenode>`: Manage groups.
+-   `/tsperm user <groups|addgroup|removegroup>`: Manage user memberships.
+-   `/tsperm test <player> <node>`: Test effective permissions.
 
 ## Configuration Files
 
-The plugin generates three configuration files in the server's data directory.
+The plugin and its modules generate configuration files in the server's data directory.
 
-### `player_data.json`
+-   **Core:** `player_data.json`, `warp_data.json`, `spawn_data.json`
+-   **Chat Module:** `modules/chat/chat_channels.json`
+-   **Permissions Module:** `modules/permissions/permissions_groups.json`, `modules/permissions/permissions_users.json`
 
-This file stores information about each player's set homes.
+## Deployment
 
--   `MaxHomes`: An integer that defines the maximum number of homes a single player is allowed to set.
--   `PlayerHomes`: An object where each key is a unique identifier for a player's home and the value is the location data for that home.
-    -   The key is a string formatted as `"player-uuid:home-name"`. The default home uses `"player-uuid:default"`.
-    -   The location data includes the world's UUID, coordinates (X, Y, Z), and rotation (Pitch, Yaw, Roll).
-
-### `warp_data.json`
-
-This file stores the locations of all server-wide warp points.
-
--   `Warps`: An object where each key is the name of the warp (in lowercase) and the value is the location data for that warp.
-
-### `spawn_data.json`
-
-This file stores the single, global server spawn point.
-
--   `Spawn`: An object containing the location data for the server spawn. If no spawn is set, this object will be absent or null.
-
-## Optional Permissions Module
-
-The permissions module builds separately from the core plugin:
-
-```bash
-mvn clean install
-mvn -f modules/permissions/pom.xml clean package
-```
-
-Deploy `target/TSEssentials-<version>.jar` to the server mods directory. Deploy optional module JARs into a `TSEssentialsModules` folder beside the core plugin JAR, for example `UserData/Mods/TSEssentialsModules/TSEssentials-Permissions-<version>.jar`. The permissions module is a plain JAR with no Hytale `manifest.json`; core TSEssentials discovers it through Java `ServiceLoader`.
-
-The module stores authoritative data in codec-backed JSON files under the core plugin data directory's `modules/permissions` folder:
-
--   `permissions_groups.json`: Local group definitions and permission nodes.
--   `permissions_users.json`: UUID-keyed group memberships and last-known usernames.
-
-Player ECS data is only an online mirror of group memberships. Removing the permissions module JAR leaves the JSON files untouched, and core TSEssentials continues to boot without the module.
-
-The permissions admin page is registered by the optional module, but its `PermissionsAdmin.ui` document is packaged with the core plugin resources because Hytale Custom UI document loader logic. The CLI commands remain the supported fallback if custom UI loading changes in a future runtime.
-
-## Optional Chat Module
-
-The chat module builds separately from the core plugin:
-
-```bash
-mvn clean install
-mvn -f modules/chat/pom.xml clean package
-```
-
-Deploy `target/TSEssentials-<version>.jar` to `UserData/Mods`. Deploy `modules/chat/target/TSEssentials-Chat.jar` to `UserData/Mods/TSEssentialsModules/TSEssentials-Chat.jar`. The chat module is a plain JAR with no Hytale `manifest.json`; core TSEssentials discovers it through Java `ServiceLoader`.
-
-When the chat module is absent, core TSEssentials boots without registering chat commands or chat event handling. When present, it restores `/channel`/`/ch`, `/g`, `/l`, `/sc`, `/ignore`, `/unignore`, `/nick`, `/nickcolor`, and `/chatedit`.
-
-The module stores authoritative channel config under the core plugin data directory's `modules/chat/chat_channels.json`. On first boot it copies legacy root `chat_channels.json` into module-owned storage if channels exist there, without deleting or rewriting the legacy file. Existing player chat ECS data is preserved by keeping the `TSEssentials_PlayerChatSettings` component id and persisted field names.
-
-`ChatEdit.ui` remains packaged with the core plugin resources because Hytale Custom UI documents are not reliably resolved from child module classloaders.
+1.  Build the core plugin: `mvn clean install`
+2.  Build desired modules (see [Available Optional Modules](#available-optional-modules)).
+3.  Deploy core JAR to `Mods/`.
+4.  Deploy module JARs to `Mods/TSEssentialsModules/`.
