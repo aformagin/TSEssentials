@@ -1,5 +1,6 @@
-package com.thirdspare.data.chat;
+package com.thirdspare.modules.chat.data;
 
+import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.ObjectMapCodec;
@@ -11,16 +12,27 @@ import java.util.Map;
 /**
  * Codec-backed JSON config for server-wide chat channels.
  */
-public class ChatChannelConfig {
+public class ChatChannelsConfig {
+    private int schemaVersion;
     private Map<String, ChatChannel> channels;
 
-    public ChatChannelConfig() {
+    public ChatChannelsConfig() {
+        this.schemaVersion = 1;
         this.channels = new HashMap<>();
     }
 
-    public ChatChannelConfig(Map<String, ChatChannel> channels) {
+    public ChatChannelsConfig(Map<String, ChatChannel> channels) {
+        this.schemaVersion = 1;
         this.channels = channels != null ? new HashMap<>(channels) : new HashMap<>();
         normalizeKeys();
+    }
+
+    public int getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setSchemaVersion(int schemaVersion) {
+        this.schemaVersion = Math.max(1, schemaVersion);
     }
 
     public Map<String, ChatChannel> getChannels() {
@@ -66,7 +78,10 @@ public class ChatChannelConfig {
         channels = normalized;
     }
 
-    public static final BuilderCodec<ChatChannelConfig> CODEC = BuilderCodec.builder(ChatChannelConfig.class, ChatChannelConfig::new)
+    public static final BuilderCodec<ChatChannelsConfig> CODEC = BuilderCodec.builder(ChatChannelsConfig.class, ChatChannelsConfig::new)
+            .append(new KeyedCodec<>("SchemaVersion", Codec.INTEGER),
+                    ChatChannelsConfig::setSchemaVersion,
+                    ChatChannelsConfig::getSchemaVersion).add()
             .append(new KeyedCodec<>("Channels",
                     new ObjectMapCodec<>(
                             ChatChannel.CODEC,

@@ -1,11 +1,11 @@
-package com.thirdspare.commands.chat;
+package com.thirdspare.modules.chat.commands;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.thirdspare.chat.ChatService;
+import com.thirdspare.modules.chat.ChatService;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 

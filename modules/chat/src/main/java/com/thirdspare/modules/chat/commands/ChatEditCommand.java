@@ -1,4 +1,4 @@
-package com.thirdspare.commands.chat;
+package com.thirdspare.modules.chat.commands;
 
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
@@ -11,10 +11,10 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.chat.ChannelManager;
-import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.modules.chat.ChannelManager;
+import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.permissions.TSEssentialsPermissions;
-import com.thirdspare.ui.ChatEditPage;
+import com.thirdspare.modules.chat.ui.ChatEditPage;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;

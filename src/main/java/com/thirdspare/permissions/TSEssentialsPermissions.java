@@ -22,6 +22,7 @@ public final class TSEssentialsPermissions {
     public static final String GLOBAL_CHAT = "tsessentials.command.g";
     public static final String LOCAL_CHAT = "tsessentials.command.l";
     public static final String STAFF_CHAT = "tsessentials.command.sc";
+    public static final String CHAT_STAFF = "tsessentials.chat.staff";
     public static final String IGNORE = "tsessentials.command.ignore";
     public static final String UNIGNORE = "tsessentials.command.unignore";
     public static final String NICK = "tsessentials.command.nick";

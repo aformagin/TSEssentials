@@ -1,4 +1,4 @@
-package com.thirdspare.chat;
+package com.thirdspare.modules.chat.component;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -6,7 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.set.SetCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.modules.chat.data.ChatChannel;
 
 import java.util.HashSet;
 import java.util.Set;

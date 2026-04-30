@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.thirdspare</groupId>
-    <artifactId>TSEssentials-Permissions</artifactId>
+    <artifactId>TSEssentials-Chat</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -44,7 +44,7 @@
     </dependencies>
 
     <build>
-        <finalName>TSEssentials-Permissions-${project.version}</finalName>
+        <finalName>TSEssentials-Chat-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

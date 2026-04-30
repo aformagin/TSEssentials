@@ -10,8 +10,7 @@ TSEssentials is a foundational Hytale server plugin designed to provide essentia
 -   **Server Warps:** Enables server administrators to create a network of server-wide warp points, facilitating easy travel to key locations like cities, dungeons, or event areas.
 -   **Server Spawn:** A global spawn point that any player can teleport to.
 -   **Teleport Requests (TPA):** Players can request to teleport to each other, or request others to teleport to them. Requests expire after 120 seconds and support accept/deny workflows.
--   **Chat Channels:** Organize communication with joinable channels (Global, Local, Staff). Supports range-based local chat and multi-channel subscriptions.
--   **Nicknames:** Allows players to set custom display names with color support.
+-   **Optional Chat Module:** Drop-in plain-JAR module for chat channels, focused chat, local/staff chat, ignores, nicknames, and the chat editor UI.
 -   **Economy System (V1):** Digital currency system with player accounts, admin management, and an in-game UI.
 -   **Optional Permissions Module:** Drop-in plain-JAR module for TSEssentials-managed groups, permission nodes, memberships, and an in-game admin UI. It is additive and does not replace Hytale's default permission provider.
 -   **Land Claims (Planned):** Robust protection system to prevent griefing.
@@ -133,7 +132,7 @@ Developers can create their own modules by implementing the `TSEModule` interfac
 
 ### Optional Permissions Module Commands
 
-These commands are available only when `TSEssentials-Permissions-<version>.jar` is present beside the core TSEssentials plugin JAR.
+These commands are available only when `TSEssentials-Permissions-<version>.jar` is present in `UserData/Mods/TSEssentialsModules`.
 
 -   `/tsperm`
     -   **Description:** Opens the permissions admin UI.
@@ -202,3 +201,20 @@ The module stores authoritative data in codec-backed JSON files under the core p
 Player ECS data is only an online mirror of group memberships. Removing the permissions module JAR leaves the JSON files untouched, and core TSEssentials continues to boot without the module.
 
 The permissions admin page is registered by the optional module, but its `PermissionsAdmin.ui` document is packaged with the core plugin resources because Hytale Custom UI document loader logic. The CLI commands remain the supported fallback if custom UI loading changes in a future runtime.
+
+## Optional Chat Module
+
+The chat module builds separately from the core plugin:
+
+```bash
+mvn clean install
+mvn -f modules/chat/pom.xml clean package
+```
+
+Deploy `target/TSEssentials-<version>.jar` to `UserData/Mods`. Deploy `modules/chat/target/TSEssentials-Chat.jar` to `UserData/Mods/TSEssentialsModules/TSEssentials-Chat.jar`. The chat module is a plain JAR with no Hytale `manifest.json`; core TSEssentials discovers it through Java `ServiceLoader`.
+
+When the chat module is absent, core TSEssentials boots without registering chat commands or chat event handling. When present, it restores `/channel`/`/ch`, `/g`, `/l`, `/sc`, `/ignore`, `/unignore`, `/nick`, `/nickcolor`, and `/chatedit`.
+
+The module stores authoritative channel config under the core plugin data directory's `modules/chat/chat_channels.json`. On first boot it copies legacy root `chat_channels.json` into module-owned storage if channels exist there, without deleting or rewriting the legacy file. Existing player chat ECS data is preserved by keeping the `TSEssentials_PlayerChatSettings` component id and persisted field names.
+
+`ChatEdit.ui` remains packaged with the core plugin resources because Hytale Custom UI documents are not reliably resolved from child module classloaders.

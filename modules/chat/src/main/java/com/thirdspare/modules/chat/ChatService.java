@@ -1,4 +1,4 @@
-package com.thirdspare.chat;
+package com.thirdspare.modules.chat;
 
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
@@ -8,7 +8,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.modules.chat.component.PlayerChatSettingsComponent;
+import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.utils.CommandUtils;
 
 import java.util.ArrayList;

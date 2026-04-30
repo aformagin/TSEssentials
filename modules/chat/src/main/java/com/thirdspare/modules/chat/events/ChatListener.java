@@ -1,8 +1,8 @@
-package com.thirdspare.events.chat;
+package com.thirdspare.modules.chat.events;
 
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
-import com.thirdspare.chat.ChatService;
-import com.thirdspare.data.chat.ChatChannel;
+import com.thirdspare.modules.chat.ChatService;
+import com.thirdspare.modules.chat.data.ChatChannel;
 
 import java.util.List;
 
