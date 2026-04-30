@@ -2,7 +2,12 @@
 
 ## Overview
 
-TSEssentials is a foundational Hytale server plugin designed to provide essential teleportation features for players and server administrators. It includes personal homes, server-wide warps, a global spawn point, and a player-to-player teleport request (TPA) system, making navigation across the game world seamless and efficient.
+TSEssentials (**ThirdSpare Essentials**) is a comprehensive "kitchen sink" styled utility plugin for Hytale servers. Inspired by the legendary *Essentials* plugin for Minecraft, it provides a foundational suite of features that server owners have come to expect—ranging from robust teleportation and economy systems to utility tools like healing and item repair. 
+
+The "TS" in our name stands for **ThirdSpare**, a moniker born from my high school days when a senior year with an empty third period became the dedicated sanctuary for experimental coding, gaming groups, and creative work. You could call it my Frank's RedHot, I slap it on
+just about every "generic" tool I make. 
+
+Designed with modularity and performance in mind, TSEssentials serves as the backbone for community management, providing essential tools that make server administration seamless while enhancing the player experience through intuitive quality-of-life features.
 
 ## Features
 
