@@ -44,6 +44,7 @@ public class PermissionsModuleBootstrap implements TSEModule {
                 PlayerPermissionMembershipComponent.CODEC
         );
         PermissionNodeRegistry nodeRegistry = new PermissionNodeRegistry();
+        nodeRegistry.registerAll(context.core().getModuleLoader().permissionNodes());
         service = new PermissionsService(manager, componentType, nodeRegistry);
         provider = new TSEPermissionsProvider(service);
         context.registerCommand(new PermissionsCommand(service));

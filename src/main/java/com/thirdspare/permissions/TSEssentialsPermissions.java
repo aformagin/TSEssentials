@@ -14,20 +14,6 @@ public final class TSEssentialsPermissions {
     public static final String TP_ACCEPT = "tsessentials.command.tpaccept";
     public static final String TP_DENY = "tsessentials.command.tpdeny";
     public static final String TP_HERE = "tsessentials.command.tphere";
-    public static final String CHANNEL = "tsessentials.command.channel";
-    public static final String CHANNEL_LIST = "tsessentials.command.channel.list";
-    public static final String CHANNEL_FOCUS = "tsessentials.command.channel.focus";
-    public static final String CHANNEL_JOIN = "tsessentials.command.channel.join";
-    public static final String CHANNEL_LEAVE = "tsessentials.command.channel.leave";
-    public static final String GLOBAL_CHAT = "tsessentials.command.g";
-    public static final String LOCAL_CHAT = "tsessentials.command.l";
-    public static final String STAFF_CHAT = "tsessentials.command.sc";
-    public static final String CHAT_STAFF = "tsessentials.chat.staff";
-    public static final String IGNORE = "tsessentials.command.ignore";
-    public static final String UNIGNORE = "tsessentials.command.unignore";
-    public static final String NICK = "tsessentials.command.nick";
-    public static final String NICK_COLOR = "tsessentials.command.nickcolor";
-    public static final String CHAT_EDIT = "tsessentials.command.chatedit";
     public static final String BALANCE = "tsessentials.command.balance";
     public static final String BALANCE_OTHERS = "tsessentials.command.balance.others";
     public static final String PAY = "tsessentials.command.pay";
@@ -42,11 +28,6 @@ public final class TSEssentialsPermissions {
     }
 
     public static String shortcut(String command) {
-        return switch (command) {
-            case "g" -> GLOBAL_CHAT;
-            case "l" -> LOCAL_CHAT;
-            case "sc" -> STAFF_CHAT;
-            default -> "tsessentials.command." + command;
-        };
+        return "tsessentials.command." + command;
     }
 }

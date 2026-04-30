@@ -138,6 +138,16 @@ public final class ModuleLoader {
         return List.copyOf(failures);
     }
 
+    public List<PermissionNodeDescriptor> permissionNodes() {
+        List<PermissionNodeDescriptor> nodes = new ArrayList<>();
+        for (LoadedModule loaded : loadedModules) {
+            if (loaded.module() instanceof PermissionCatalogContributor contributor) {
+                nodes.addAll(contributor.permissionNodes());
+            }
+        }
+        return List.copyOf(nodes);
+    }
+
     private void loadJar(Path jar) {
         URLClassLoader classLoader = null;
         try {

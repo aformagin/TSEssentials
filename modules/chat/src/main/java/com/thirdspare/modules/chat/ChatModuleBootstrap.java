@@ -9,6 +9,8 @@ import com.thirdspare.modules.api.TSEModule;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
 import com.thirdspare.modules.api.TSEPlayerChatEventHandler;
+import com.thirdspare.modules.core.PermissionCatalogContributor;
+import com.thirdspare.modules.core.PermissionNodeDescriptor;
 import com.thirdspare.modules.chat.commands.ChannelCommand;
 import com.thirdspare.modules.chat.commands.ChannelMessageCommand;
 import com.thirdspare.modules.chat.commands.ChatEditCommand;
@@ -22,9 +24,10 @@ import com.thirdspare.modules.chat.events.ChatListener;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.logging.Level;
 
-public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler {
+public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler, PermissionCatalogContributor {
     private static final TSEModuleDescriptor DESCRIPTOR = new TSEModuleDescriptor(
             "chat",
             "TSEssentials Chat",
@@ -92,6 +95,11 @@ public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler
         if (chatService != null) {
             new ChatListener(chatService).onPlayerChat(event);
         }
+    }
+
+    @Override
+    public Collection<PermissionNodeDescriptor> permissionNodes() {
+        return TSEChatPermissionsNodes.permissionNodes();
     }
 
     private void migrateLegacyChannelsIfNeeded(TSEModuleContext context,

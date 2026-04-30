@@ -3,7 +3,6 @@ package com.thirdspare.modules.chat;
 import com.hypixel.hytale.server.core.util.Config;
 import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.modules.chat.data.ChatChannelsConfig;
-import com.thirdspare.permissions.TSEssentialsPermissions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,7 +14,7 @@ public class ChannelManager {
     public static final String GLOBAL = "global";
     public static final String LOCAL = "local";
     public static final String STAFF = "staff";
-    public static final String STAFF_PERMISSION = TSEssentialsPermissions.CHAT_STAFF;
+    public static final String STAFF_PERMISSION = TSEChatPermissionsNodes.CHAT_STAFF;
 
     private static final Pattern COLOR_PATTERN = Pattern.compile("^#[0-9A-Fa-f]{6}$");
     private final Config<ChatChannelsConfig> config;
