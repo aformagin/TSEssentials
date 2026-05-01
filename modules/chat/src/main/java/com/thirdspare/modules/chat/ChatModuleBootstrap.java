@@ -18,12 +18,9 @@ import com.thirdspare.modules.chat.commands.IgnoreCommand;
 import com.thirdspare.modules.chat.commands.NickColorCommand;
 import com.thirdspare.modules.chat.commands.NickCommand;
 import com.thirdspare.modules.chat.component.PlayerChatSettingsComponent;
-import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.modules.chat.data.ChatChannelsConfig;
 import com.thirdspare.modules.chat.events.ChatListener;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.logging.Level;
 
@@ -51,7 +48,6 @@ public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler
             chatChannels = new ChatChannelsConfig();
             chatConfig.save().join();
         }
-        migrateLegacyChannelsIfNeeded(context, chatConfig, chatChannels);
 
         ComponentType<EntityStore, PlayerChatSettingsComponent> componentType = context.registerComponent(
                 PlayerChatSettingsComponent.class,
@@ -102,32 +98,4 @@ public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler
         return TSEChatPermissionsNodes.permissionNodes();
     }
 
-    private void migrateLegacyChannelsIfNeeded(TSEModuleContext context,
-                                               Config<ChatChannelsConfig> moduleConfig,
-                                               ChatChannelsConfig moduleChannels) {
-        if (moduleChannels != null && !moduleChannels.isEmpty()) {
-            return;
-        }
-
-        Path legacyDataDirectory = context.moduleDataDirectory()
-                .getParent()
-                .getParent();
-        if (legacyDataDirectory == null || !Files.exists(legacyDataDirectory.resolve("chat_channels.json"))) {
-            return;
-        }
-
-        Config<ChatChannelsConfig> legacyConfig = new Config<>(legacyDataDirectory, "chat_channels", ChatChannelsConfig.CODEC);
-        legacyConfig.load().join();
-        ChatChannelsConfig legacyChannels = legacyConfig.get();
-        if (legacyChannels == null || legacyChannels.isEmpty()) {
-            return;
-        }
-
-        for (ChatChannel channel : legacyChannels.getAllChannels()) {
-            moduleChannels.setChannel(channel.copy());
-        }
-        moduleChannels.normalizeKeys();
-        moduleConfig.save().join();
-        context.logger().at(Level.INFO).log("Migrated legacy core chat_channels.json into optional chat module storage.");
-    }
 }
