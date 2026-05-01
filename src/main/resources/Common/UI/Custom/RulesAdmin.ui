@@ -46,12 +46,22 @@ Group {
       $C.@TextField #TitleInput { @Anchor = (Height: 38, Bottom: 14); }
 
       @FieldLabel { Text: "Rules"; }
-      $C.@TextField #RulesInput { @Anchor = (Height: 40, Bottom: 12); }
+      MultilineTextField #RulesInput {
+        Anchor: (Height: 180, Bottom: 12);
+        Background: $C.@InputBoxBackground;
+        MaxVisibleLines: 9;
+        AutoGrow: false;
+        MaxLength: 2000;
+        ContentPadding: (Horizontal: 10, Vertical: 8);
+        Style: $C.@DefaultInputFieldStyle;
+        PlaceholderStyle: $C.@DefaultInputFieldPlaceholderStyle;
+        PlaceholderText: "Be kind.";
+      }
 
       Label {
         FlexWeight: 1;
-        Text: "Use one line of text or paste multiple lines if supported by your client. Command fallback also supports /rulesadmin set rule one | rule two.";
-        Style: (FontSize: 13, TextColor: #cccccc, VerticalAlignment: Top, Wrap: true);
+        Text: "Each line is shown as a separate numbered rule. Command fallback also supports /rulesadmin set rule one | rule two.";
+        Style: (FontSize: 13, TextColor: #cccccc, VerticalAlignment: Center, Wrap: true);
       }
 
       Group #Actions {

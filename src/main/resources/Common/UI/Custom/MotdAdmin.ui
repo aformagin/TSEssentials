@@ -71,13 +71,21 @@ Group {
       }
 
       @FieldLabel { Text: "Message Lines"; }
-      $C.@TextField #LinesInput {
-        @Anchor = (Height: 40, Bottom: 12);
+      MultilineTextField #LinesInput {
+        Anchor: (Height: 140, Bottom: 12);
+        Background: $C.@InputBoxBackground;
+        MaxVisibleLines: 8;
+        AutoGrow: false;
+        MaxLength: 1000;
+        ContentPadding: (Horizontal: 10, Vertical: 8);
+        Style: $C.@DefaultInputFieldStyle;
+        PlaceholderStyle: $C.@DefaultInputFieldPlaceholderStyle;
+        PlaceholderText: "Welcome to the server!";
       }
 
       Label {
         Anchor: (Height: 42);
-        Text: "Use one line of text or paste multiple lines if supported by your client.";
+        Text: "Each line is sent as a separate MOTD line.";
         Style: (FontSize: 13, TextColor: #cccccc, VerticalAlignment: Center, Wrap: true);
       }
 

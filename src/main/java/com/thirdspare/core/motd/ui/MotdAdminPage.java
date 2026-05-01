@@ -65,8 +65,8 @@ public class MotdAdminPage extends InteractiveCustomUIPage<MotdAdminPage.MotdAdm
     private void render(UICommandBuilder builder, UIEventBuilder events) {
         renderColorDropdown(builder, "#TitleColorDropdown");
         renderColorDropdown(builder, "#LineColorDropdown");
-
         MotdConfig motd = manager.getMotd();
+
         builder.set("#EnabledCheck.Value", motd.isEnabled());
         builder.set("#ShowOnJoinCheck.Value", motd.isShowOnJoin());
         builder.set("#LinesInput.Value", manager.linesText());
@@ -78,9 +78,9 @@ public class MotdAdminPage extends InteractiveCustomUIPage<MotdAdminPage.MotdAdm
                 .append("Action", "Save")
                 .append("@Enabled", "#EnabledCheck.Value")
                 .append("@ShowOnJoin", "#ShowOnJoinCheck.Value")
-                .append("@Lines", "#LinesInput.Value")
                 .append("@TitleColor", "#TitleColorDropdown.Value")
-                .append("@LineColor", "#LineColorDropdown.Value"), false);
+                .append("@LineColor", "#LineColorDropdown.Value")
+                .append("@Lines", "#LinesInput.Value"), false);
     }
 
     private void renderColorDropdown(UICommandBuilder builder, String selector) {
@@ -114,22 +114,22 @@ public class MotdAdminPage extends InteractiveCustomUIPage<MotdAdminPage.MotdAdm
                         .append(new KeyedCodec<>("@ShowOnJoin", Codec.BOOLEAN),
                                 (data, value) -> data.showOnJoin = value,
                                 data -> data.showOnJoin).add()
-                        .append(new KeyedCodec<>("@Lines", Codec.STRING),
-                                (data, value) -> data.lines = value != null ? value : "",
-                                data -> data.lines).add()
                         .append(new KeyedCodec<>("@TitleColor", Codec.STRING),
                                 (data, value) -> data.titleColor = value != null ? value : "#F1BA50",
                                 data -> data.titleColor).add()
                         .append(new KeyedCodec<>("@LineColor", Codec.STRING),
                                 (data, value) -> data.lineColor = value != null ? value : "#FFFFFF",
                                 data -> data.lineColor).add()
+                        .append(new KeyedCodec<>("@Lines", Codec.STRING),
+                                (data, value) -> data.lines = value != null ? value : "",
+                                data -> data.lines).add()
                         .build();
 
         private String action = "";
         private boolean enabled;
         private boolean showOnJoin;
-        private String lines = "";
         private String titleColor = "#F1BA50";
         private String lineColor = "#FFFFFF";
+        private String lines = "";
     }
 }

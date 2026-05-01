@@ -130,15 +130,31 @@ Group {
             Padding: (Left: 12);
 
             @SectionTitle { Text: "Items"; }
-            @FieldLabel { Text: "Item"; }
-            $C.@DropdownBox #ItemDropdown {
-              @Anchor = (Height: 36, Bottom: 8);
-              ShowSearchInput: false;
-              MaxSelection: 1;
-            }
+            Group #ItemEntryRow {
+              Anchor: (Height: 58, Bottom: 8);
+              LayoutMode: Left;
 
-            @FieldLabel { Text: "Quantity"; }
-            $C.@NumberField #QuantityInput { @Anchor = (Height: 36, Bottom: 8); Value: 1; }
+              Group #ItemSelectorPane {
+                FlexWeight: 1;
+                LayoutMode: Top;
+                Padding: (Right: 8);
+
+                @FieldLabel { Text: "Item"; }
+                $C.@DropdownBox #ItemDropdown {
+                  @Anchor = (Height: 36);
+                  ShowSearchInput: false;
+                  MaxSelection: 1;
+                }
+              }
+
+              Group #QuantityPane {
+                Anchor: (Width: 130);
+                LayoutMode: Top;
+
+                @FieldLabel { Text: "Quantity"; }
+                $C.@NumberField #QuantityInput { @Anchor = (Height: 36); Value: 1; }
+              }
+            }
 
             Group #ItemButtons {
               Anchor: (Height: 38, Bottom: 12);
