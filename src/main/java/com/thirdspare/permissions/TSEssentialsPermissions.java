@@ -14,19 +14,23 @@ public final class TSEssentialsPermissions {
     public static final String TP_ACCEPT = "tsessentials.command.tpaccept";
     public static final String TP_DENY = "tsessentials.command.tpdeny";
     public static final String TP_HERE = "tsessentials.command.tphere";
-    public static final String CHANNEL = "tsessentials.command.channel";
-    public static final String CHANNEL_LIST = "tsessentials.command.channel.list";
-    public static final String CHANNEL_FOCUS = "tsessentials.command.channel.focus";
-    public static final String CHANNEL_JOIN = "tsessentials.command.channel.join";
-    public static final String CHANNEL_LEAVE = "tsessentials.command.channel.leave";
-    public static final String GLOBAL_CHAT = "tsessentials.command.g";
-    public static final String LOCAL_CHAT = "tsessentials.command.l";
-    public static final String STAFF_CHAT = "tsessentials.command.sc";
-    public static final String IGNORE = "tsessentials.command.ignore";
-    public static final String UNIGNORE = "tsessentials.command.unignore";
-    public static final String NICK = "tsessentials.command.nick";
-    public static final String NICK_COLOR = "tsessentials.command.nickcolor";
-    public static final String CHAT_EDIT = "tsessentials.command.chatedit";
+    public static final String HEAL = "tsessentials.command.heal";
+    public static final String HEAL_OTHERS = "tsessentials.command.heal.others";
+    public static final String REPAIR = "tsessentials.command.repair";
+    public static final String REPAIR_ALL = "tsessentials.command.repairall";
+    public static final String MOTD = "tsessentials.command.motd";
+    public static final String MOTD_ADMIN = "tsessentials.command.motd.admin";
+    public static final String NEARBY = "tsessentials.command.nearby";
+    public static final String KIT = "tsessentials.command.kit";
+    public static final String KIT_ADMIN = "tsessentials.command.kit.admin";
+    public static final String GET_POS = "tsessentials.command.getpos";
+    public static final String GET_POS_OTHERS = "tsessentials.command.getpos.others";
+    public static final String RULES = "tsessentials.command.rules";
+    public static final String RULES_ADMIN = "tsessentials.command.rules.admin";
+    public static final String FLY = "tsessentials.command.fly";
+    public static final String FLY_OTHERS = "tsessentials.command.fly.others";
+    public static final String BACK = "tsessentials.command.back";
+    public static final String TP_ALL = "tsessentials.command.tpall";
     public static final String BALANCE = "tsessentials.command.balance";
     public static final String BALANCE_OTHERS = "tsessentials.command.balance.others";
     public static final String PAY = "tsessentials.command.pay";
@@ -41,11 +45,6 @@ public final class TSEssentialsPermissions {
     }
 
     public static String shortcut(String command) {
-        return switch (command) {
-            case "g" -> GLOBAL_CHAT;
-            case "l" -> LOCAL_CHAT;
-            case "sc" -> STAFF_CHAT;
-            default -> "tsessentials.command." + command;
-        };
+        return "tsessentials.command." + command;
     }
 }

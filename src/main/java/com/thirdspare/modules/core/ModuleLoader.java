@@ -1,12 +1,16 @@
 package com.thirdspare.modules.core;
 
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.thirdspare.modules.api.TSEModule;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
+import com.thirdspare.modules.api.TSEPlayerChatEventHandler;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -105,6 +109,18 @@ public final class ModuleLoader {
         }
     }
 
+    public void onPlayerChat(PlayerChatEvent event) {
+        for (LoadedModule loaded : loadedModules) {
+            if (loaded.module() instanceof TSEPlayerChatEventHandler handler) {
+                try {
+                    handler.onPlayerChat(event);
+                } catch (RuntimeException ex) {
+                    recordFailure(loaded.jarPath(), "Module chat hook failed for " + loaded.descriptor().id() + ".", ex);
+                }
+            }
+        }
+    }
+
     public Optional<LoadedModule> getModule(String moduleId) {
         return loadedModules.stream()
                 .filter(loaded -> loaded.descriptor().id().equalsIgnoreCase(moduleId))
@@ -120,6 +136,16 @@ public final class ModuleLoader {
 
     public List<ModuleLoadFailure> failures() {
         return List.copyOf(failures);
+    }
+
+    public List<PermissionNodeDescriptor> permissionNodes() {
+        List<PermissionNodeDescriptor> nodes = new ArrayList<>();
+        for (LoadedModule loaded : loadedModules) {
+            if (loaded.module() instanceof PermissionCatalogContributor contributor) {
+                nodes.addAll(contributor.permissionNodes());
+            }
+        }
+        return List.copyOf(nodes);
     }
 
     private void loadJar(Path jar) {
@@ -158,7 +184,15 @@ public final class ModuleLoader {
 
     private void recordFailure(Path jarPath, String message, Throwable cause) {
         failures.add(new ModuleLoadFailure(jarPath, message, cause));
-        log(Level.WARNING, message + " " + jarPath + " - " + cause.getMessage());
+        log(Level.WARNING, message + " " + jarPath + " - " +
+                cause.getClass().getName() + ": " + cause.getMessage() +
+                System.lineSeparator() + stackTrace(cause));
+    }
+
+    private String stackTrace(Throwable cause) {
+        StringWriter writer = new StringWriter();
+        cause.printStackTrace(new PrintWriter(writer));
+        return writer.toString();
     }
 
     private void log(Level level, String message) {

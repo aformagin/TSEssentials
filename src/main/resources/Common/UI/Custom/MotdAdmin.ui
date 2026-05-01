@@ -1,0 +1,99 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #MotdAdminPanel {
+    Anchor: (Width: 920, Height: 620);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "MOTD Admin";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 360, Height: 34);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      Background: #414141(0.92);
+      LayoutMode: Top;
+      Padding: (Full: 22);
+
+      Group #EnabledRow {
+        Anchor: (Height: 38, Bottom: 12);
+        LayoutMode: Left;
+        $C.@CheckBox #EnabledCheck { Anchor: (Width: 24, Height: 24, Right: 10); }
+        Label { FlexWeight: 1; Text: "MOTD enabled"; Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center); }
+      }
+
+      Group #JoinRow {
+        Anchor: (Height: 38, Bottom: 16);
+        LayoutMode: Left;
+        $C.@CheckBox #ShowOnJoinCheck { Anchor: (Width: 24, Height: 24, Right: 10); }
+        Label { FlexWeight: 1; Text: "Show when players join"; Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center); }
+      }
+
+      @FieldLabel { Text: "Title Colour"; }
+      $C.@DropdownBox #TitleColorDropdown {
+        @Anchor = (Height: 38, Bottom: 12);
+        ShowSearchInput: false;
+        MaxSelection: 1;
+      }
+
+      @FieldLabel { Text: "Message Colour"; }
+      $C.@DropdownBox #LineColorDropdown {
+        @Anchor = (Height: 38, Bottom: 12);
+        ShowSearchInput: false;
+        MaxSelection: 1;
+      }
+
+      @FieldLabel { Text: "Message Lines"; }
+      MultilineTextField #LinesInput {
+        Anchor: (Height: 140, Bottom: 12);
+        Background: $C.@InputBoxBackground;
+        MaxVisibleLines: 8;
+        AutoGrow: false;
+        MaxLength: 1000;
+        ContentPadding: (Horizontal: 10, Vertical: 8);
+        Style: $C.@DefaultInputFieldStyle;
+        PlaceholderStyle: $C.@DefaultInputFieldPlaceholderStyle;
+        PlaceholderText: "Welcome to the server!";
+      }
+
+      Label {
+        Anchor: (Height: 42);
+        Text: "Each line is sent as a separate MOTD line.";
+        Style: (FontSize: 13, TextColor: #cccccc, VerticalAlignment: Center, Wrap: true);
+      }
+
+      Group #Actions {
+        Anchor: (Height: 46, Top: 16);
+        LayoutMode: Right;
+        $C.@TextButton #SaveButton { @Anchor = (Width: 150); Text: "Save"; }
+      }
+    }
+  }
+}

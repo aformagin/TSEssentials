@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.TSEPermissionsNodes;
 import com.thirdspare.modules.permissions.ui.PermissionsAdminPage;
@@ -16,20 +17,22 @@ import java.util.concurrent.CompletableFuture;
 
 public class PermissionsUICommand extends AbstractCommand {
     private final PermissionsService service;
+    private final TSEUiDocument adminUi;
 
-    public PermissionsUICommand(PermissionsService service) {
+    public PermissionsUICommand(PermissionsService service, TSEUiDocument adminUi) {
         super("tspermui", "Open permissions admin controls");
         requirePermission(TSEPermissionsNodes.UI);
         this.service = service;
+        this.adminUi = adminUi;
     }
 
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
-        openPage(context, service);
+        openPage(context, service, adminUi);
         return CompletableFuture.completedFuture(null);
     }
 
-    public static void openPage(CommandContext context, PermissionsService service) {
+    public static void openPage(CommandContext context, PermissionsService service, TSEUiDocument adminUi) {
         PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
         if (player == null) {
             return;
@@ -47,7 +50,8 @@ public class PermissionsUICommand extends AbstractCommand {
                 var store = ref.getStore();
                 Player playerComponent = store.getComponent(ref, Player.getComponentType());
                 if (playerComponent != null) {
-                    playerComponent.getPageManager().openCustomPage(ref, store, new PermissionsAdminPage(player, service));
+                    playerComponent.getPageManager().openCustomPage(ref, store,
+                            new PermissionsAdminPage(player, service, adminUi));
                 }
             } catch (IllegalStateException ignored) {
                 // The player can leave before the queued UI open runs.

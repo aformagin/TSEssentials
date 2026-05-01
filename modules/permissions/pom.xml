@@ -6,11 +6,11 @@
 
     <groupId>com.thirdspare</groupId>
     <artifactId>TSEssentials-Permissions</artifactId>
-    <version>1.1.0-PERMISSIONS-SNAPSHOT</version>
+    <version>1.0</version>
 
     <properties>
         <hytale.server.version>2026.03.26-89796e57b</hytale.server.version>
-        <tsessentials.version>1.1.0-ECON-SNAPSHOT</tsessentials.version>
+        <tsessentials.version>1.1.0-MODULES-SNAPSHOT</tsessentials.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>

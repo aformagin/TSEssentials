@@ -1,0 +1,59 @@
+$C = "Common.ui";
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #KitPanel {
+    Anchor: (Width: 820, Height: 620);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "Available Kits";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 340, Height: 34);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      Background: #252525(0.92);
+      LayoutMode: Top;
+      Padding: (Full: 18);
+
+      Label #EmptyMessage {
+        Anchor: (Height: 34, Bottom: 10);
+        Visible: false;
+        Text: "No kits are available to you.";
+        Style: (FontSize: 15, RenderBold: true, TextColor: #ffb4b4, VerticalAlignment: Center);
+      }
+
+      $C.@TextButton #KitRow0 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow1 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow2 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow3 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow4 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow5 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow6 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow7 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow8 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+      $C.@TextButton #KitRow9 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+    }
+  }
+}

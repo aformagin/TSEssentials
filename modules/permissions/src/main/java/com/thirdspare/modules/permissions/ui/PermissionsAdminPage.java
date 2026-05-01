@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.modules.core.PermissionNodeDescriptor;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.permissions.PermissionsManager;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.data.PermissionsGroup;
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class PermissionsAdminPage extends InteractiveCustomUIPage<PermissionsAdminPage.PermissionsEventData> {
     private static final int MAX_GROUP_ROWS = 10;
@@ -32,21 +34,23 @@ public class PermissionsAdminPage extends InteractiveCustomUIPage<PermissionsAdm
     private static final int MAX_MEMBER_ROWS = 8;
 
     private final PermissionsService service;
+    private final TSEUiDocument uiDocument;
     private String selectedGroupName = "";
     private String selectedMemberTarget = "";
     private String pendingDefaultGroupName = "";
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public PermissionsAdminPage(PlayerRef playerRef, PermissionsService service) {
+    public PermissionsAdminPage(PlayerRef playerRef, PermissionsService service, TSEUiDocument uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, PermissionsEventData.CODEC);
         this.service = service;
+        this.uiDocument = Objects.requireNonNull(uiDocument, "uiDocument");
     }
 
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        builder.append("PermissionsAdmin.ui");
+        uiDocument.appendTo(builder);
         ensureSelection();
         render(builder, events);
     }

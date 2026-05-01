@@ -3,8 +3,10 @@ package com.thirdspare;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.event.EventRegistry;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
@@ -12,39 +14,42 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.chat.ChannelManager;
-import com.thirdspare.chat.ChatService;
-import com.thirdspare.chat.PlayerChatSettingsComponent;
-import com.thirdspare.commands.*;
-import com.thirdspare.commands.chat.*;
-import com.thirdspare.commands.economy.BalanceCommand;
-import com.thirdspare.commands.economy.EcoCommand;
-import com.thirdspare.commands.economy.EconAdminUICommand;
-import com.thirdspare.commands.economy.WalletCommand;
-import com.thirdspare.commands.economy.PayCommand;
-import com.thirdspare.data.chat.ChatChannelConfig;
-import com.thirdspare.data.economy.EconomyAccountsConfig;
-import com.thirdspare.data.economy.EconomyConfig;
-import com.thirdspare.data.PlayerDataConfig;
-import com.thirdspare.data.SpawnConfig;
-import com.thirdspare.data.WarpConfig;
-import com.thirdspare.economy.EconomyManager;
-import com.thirdspare.economy.EconomyService;
-import com.thirdspare.economy.PlayerEconomyComponent;
+import com.thirdspare.commands.core.*;
+import com.thirdspare.core.back.BackService;
+import com.thirdspare.core.flight.FlightService;
+import com.thirdspare.core.kits.KitManager;
+import com.thirdspare.core.kits.KitService;
+import com.thirdspare.core.kits.data.KitsConfig;
+import com.thirdspare.core.motd.MotdManager;
+import com.thirdspare.core.motd.data.MotdConfig;
+import com.thirdspare.core.nearby.NearbyService;
+import com.thirdspare.core.position.PositionService;
+import com.thirdspare.core.rules.RulesManager;
+import com.thirdspare.core.rules.data.RulesConfig;
+import com.thirdspare.core.teleport.TeleportAllService;
+import com.thirdspare.core.homes.HomeService;
+import com.thirdspare.core.homes.PlayerHomesComponent;
+import com.thirdspare.core.homes.data.PlayerDataConfig;
+import com.thirdspare.core.spawn.data.SpawnConfig;
+import com.thirdspare.core.tpa.TeleportRequestManager;
+import com.thirdspare.core.warps.data.WarpConfig;
 import com.thirdspare.events.ExampleEvent;
-import com.thirdspare.events.chat.ChatListener;
-import com.thirdspare.homes.HomeService;
-import com.thirdspare.homes.PlayerHomesComponent;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.core.ModuleLoader;
 import com.thirdspare.modules.core.ModulePaths;
+import com.thirdspare.modules.core.ModuleUiCommonAsset;
 import com.thirdspare.permissions.TSEssentialsPermissions;
-import com.thirdspare.tpa.TeleportRequestManager;
+import com.thirdspare.utils.Teleportation;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 public class TSEssentials extends JavaPlugin {
@@ -60,27 +65,24 @@ public class TSEssentials extends JavaPlugin {
     /* Spawn data configuration with codec-based JSON persistence */
     private final Config<SpawnConfig> spawnDataConfig = withConfig("spawn_data", SpawnConfig.CODEC);
 
-    /* Chat channel configuration with codec-based JSON persistence */
-    private final Config<ChatChannelConfig> chatChannelConfig = withConfig("chat_channels", ChatChannelConfig.CODEC);
-
-    /* Economy configuration and known account ledger */
-    private final Config<EconomyConfig> economyConfig = withConfig("economy_config", EconomyConfig.CODEC);
-    private final Config<EconomyAccountsConfig> economyAccountsConfig = withConfig("economy_accounts", EconomyAccountsConfig.CODEC);
+    private final Config<MotdConfig> motdConfig = withConfig("motd_config", MotdConfig.CODEC);
+    private final Config<RulesConfig> rulesConfig = withConfig("rules_config", RulesConfig.CODEC);
+    private final Config<KitsConfig> kitsConfig = withConfig("kits_config", KitsConfig.CODEC);
 
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
     private SpawnConfig spawnData;
-    private ChatChannelConfig chatChannelData;
-    private EconomyConfig economyData;
-    private EconomyAccountsConfig economyAccountsData;
-    private ComponentType<EntityStore, PlayerChatSettingsComponent> playerChatSettingsComponentType;
     private ComponentType<EntityStore, PlayerHomesComponent> playerHomesComponentType;
-    private ComponentType<EntityStore, PlayerEconomyComponent> playerEconomyComponentType;
-    private ChannelManager channelManager;
-    private ChatService chatService;
     private HomeService homeService;
-    private EconomyManager economyManager;
-    private EconomyService economyService;
+    private MotdManager motdManager;
+    private RulesManager rulesManager;
+    private KitManager kitManager;
+    private KitService kitService;
+    private NearbyService nearbyService;
+    private PositionService positionService;
+    private FlightService flightService;
+    private BackService backService;
+    private TeleportAllService teleportAllService;
     private TeleportRequestManager teleportRequestManager;
     private ModuleLoader moduleLoader;
 
@@ -90,23 +92,11 @@ public class TSEssentials extends JavaPlugin {
 
     @Override
     protected void setup() {
-        playerChatSettingsComponentType = this.getEntityStoreRegistry()
-                .registerComponent(
-                        PlayerChatSettingsComponent.class,
-                        "TSEssentials_PlayerChatSettings",
-                        PlayerChatSettingsComponent.CODEC
-                );
         playerHomesComponentType = this.getEntityStoreRegistry()
                 .registerComponent(
                         PlayerHomesComponent.class,
                         "TSEssentials_PlayerHomes",
                         PlayerHomesComponent.CODEC
-                );
-        playerEconomyComponentType = this.getEntityStoreRegistry()
-                .registerComponent(
-                        PlayerEconomyComponent.class,
-                        "TSEssentials_PlayerEconomy",
-                        PlayerEconomyComponent.CODEC
                 );
 
         /* Set up data directory - automatically handled by withConfig */
@@ -122,18 +112,19 @@ public class TSEssentials extends JavaPlugin {
         spawnData = spawnDataConfig.get();
         this.getLogger().at(Level.INFO).log("Server spawn " + (spawnData.hasSpawn() ? "loaded" : "not set"));
 
-        chatChannelData = chatChannelConfig.get();
-        channelManager = new ChannelManager(chatChannelConfig, chatChannelData);
-        chatService = new ChatService(channelManager, playerChatSettingsComponentType);
-        this.getLogger().at(Level.INFO).log("Loaded " + channelManager.getChannels().size() + " chat channels");
-
-        economyData = economyConfig.get();
-        economyAccountsData = economyAccountsConfig.get();
-        economyManager = new EconomyManager(economyConfig, economyData, economyAccountsConfig, economyAccountsData);
-        economyService = new EconomyService(economyManager, playerEconomyComponentType);
-        this.getLogger().at(Level.INFO).log("Loaded " + economyAccountsData.getAccounts().size() + " economy accounts");
         this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
                 TSEssentialsPermissions.COMMAND_WILDCARD);
+
+        motdManager = new MotdManager(motdConfig, motdConfig.get());
+        rulesManager = new RulesManager(rulesConfig, rulesConfig.get());
+        kitManager = new KitManager(kitsConfig, kitsConfig.get());
+        kitService = new KitService(kitManager);
+        nearbyService = new NearbyService();
+        positionService = new PositionService();
+        flightService = new FlightService();
+        backService = new BackService();
+        teleportAllService = new TeleportAllService();
+        Teleportation.setBackService(backService);
 
         moduleLoader = new ModuleLoader(
                 ModulePaths.defaultModulesDirectory(this),
@@ -161,33 +152,28 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new TpAcceptCommand("tpaccept", "Accept a pending teleport request", this));
         this.getCommandRegistry().registerCommand(new TpDenyCommand("tpdeny", "Deny a pending teleport request", this));
         this.getCommandRegistry().registerCommand(new TpHereCommand("tphere", "Force teleport a player to you (admin)", this));
-
-        this.getCommandRegistry().registerCommand(new ChannelCommand(chatService));
-
-        this.getCommandRegistry().registerCommand(new ChannelMessageCommand("g", "Send a global chat message", ChannelManager.GLOBAL, chatService));
-        this.getCommandRegistry().registerCommand(new ChannelMessageCommand("l", "Send a local chat message", ChannelManager.LOCAL, chatService));
-        this.getCommandRegistry().registerCommand(new ChannelMessageCommand("sc", "Send a staff chat message", ChannelManager.STAFF, chatService));
-        this.getCommandRegistry().registerCommand(new IgnoreCommand("ignore", "Ignore a player's chat messages", true, chatService));
-        this.getCommandRegistry().registerCommand(new IgnoreCommand("unignore", "Stop ignoring a player's chat messages", false, chatService));
-
-        this.getCommandRegistry().registerCommand(new NickCommand(chatService));
-        this.getCommandRegistry().registerCommand(new NickColorCommand(chatService));
-        this.getCommandRegistry().registerCommand(new ChatEditCommand(channelManager));
-
-        this.getCommandRegistry().registerCommand(new BalanceCommand(economyService));
-        this.getCommandRegistry().registerCommand(new PayCommand(economyService));
-        this.getCommandRegistry().registerCommand(new WalletCommand(economyService));
-        this.getCommandRegistry().registerCommand(new EcoCommand(economyService));
-        this.getCommandRegistry().registerCommand(new EconAdminUICommand(economyService));
+        this.getCommandRegistry().registerCommand(new HealCommand());
+        this.getCommandRegistry().registerCommand(new RepairCommand());
+        this.getCommandRegistry().registerCommand(new RepairAllCommand());
+        this.getCommandRegistry().registerCommand(new MotdCommand(motdManager));
+        this.getCommandRegistry().registerCommand(new MotdAdminCommand(motdManager));
+        this.getCommandRegistry().registerCommand(new NearbyCommand(nearbyService));
+        this.getCommandRegistry().registerCommand(new KitCommand(kitService));
+        this.getCommandRegistry().registerCommand(new KitAdminCommand(kitService));
+        this.getCommandRegistry().registerCommand(new GetPosCommand(positionService));
+        this.getCommandRegistry().registerCommand(new RulesCommand(rulesManager));
+        this.getCommandRegistry().registerCommand(new RulesAdminCommand(rulesManager));
+        this.getCommandRegistry().registerCommand(new FlyCommand(flightService));
+        this.getCommandRegistry().registerCommand(new BackCommand(backService));
+        this.getCommandRegistry().registerCommand(new TpAllCommand(teleportAllService));
 
         /* Event Registry */
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
             ExampleEvent.onPlayerReady(event);
-            chatService.loadSettings(event.getPlayer().getPlayerRef());
-            economyService.loadEconomy(event.getPlayer().getPlayerRef());
+            motdManager.sendTo(event.getPlayer().getPlayerRef(), false);
             moduleLoader.onPlayerReady(event.getPlayer().getPlayerRef());
         });
-        this.getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener(chatService)::onPlayerChat);
+        this.getEventRegistry().registerGlobal(PlayerChatEvent.class, event -> moduleLoader.onPlayerChat(event));
 
         moduleLoader.enableAll();
     }
@@ -215,6 +201,10 @@ public class TSEssentials extends JavaPlugin {
         getCommandRegistry().registerCommand(command);
     }
 
+    public void registerModuleEntitySystem(EntityEventSystem<EntityStore, ?> system) {
+        getEntityStoreRegistry().registerSystem(system);
+    }
+
     public ModuleLoader getModuleLoader() {
         return moduleLoader;
     }
@@ -226,16 +216,19 @@ public class TSEssentials extends JavaPlugin {
         } catch (Exception ex) {
             getLogger().at(Level.WARNING).log("Unable to create module data directory " + dataDirectory + ": " + ex.getMessage());
         }
-        return new CoreModuleContext(jarPath, dataDirectory);
+        return new CoreModuleContext(jarPath, dataDirectory, descriptor);
     }
 
     private final class CoreModuleContext implements TSEModuleContext {
+        private static final long MAX_UI_DOCUMENT_BYTES = 256L * 1024L;
         private final Path moduleJarPath;
         private final Path moduleDataDirectory;
+        private final TSEModuleDescriptor descriptor;
 
-        private CoreModuleContext(Path moduleJarPath, Path moduleDataDirectory) {
+        private CoreModuleContext(Path moduleJarPath, Path moduleDataDirectory, TSEModuleDescriptor descriptor) {
             this.moduleJarPath = moduleJarPath;
             this.moduleDataDirectory = moduleDataDirectory;
+            this.descriptor = descriptor;
         }
 
         @Override
@@ -281,13 +274,101 @@ public class TSEssentials extends JavaPlugin {
         }
 
         @Override
+        public TSEUiDocument registerUiDocument(String documentName, String resourcePath) {
+            String normalizedPath = normalizeUiResourcePath(resourcePath);
+            String normalizedName = normalizeUiDocumentName(documentName);
+            try (JarFile jarFile = new JarFile(moduleJarPath.toFile())) {
+                JarEntry entry = jarFile.getJarEntry(normalizedPath);
+                if (entry == null || entry.isDirectory()) {
+                    throw new IllegalArgumentException("Module UI resource not found: " + normalizedPath);
+                }
+                if (entry.getSize() > MAX_UI_DOCUMENT_BYTES) {
+                    throw new IllegalArgumentException("Module UI resource is too large: " + normalizedPath);
+                }
+                byte[] bytes;
+                try (var input = jarFile.getInputStream(entry)) {
+                    bytes = input.readAllBytes();
+                }
+                if (bytes.length > MAX_UI_DOCUMENT_BYTES) {
+                    throw new IllegalArgumentException("Module UI resource is too large: " + normalizedPath);
+                }
+                String assetPackName = "TSEssentials:" + descriptor.id();
+                String commonAssetName = toCommonAssetName(normalizedPath);
+                CommonAssetModule commonAssetModule = CommonAssetModule.get();
+                commonAssetModule.addCommonAsset(
+                        assetPackName,
+                        new ModuleUiCommonAsset(commonAssetName, bytes),
+                        true
+                );
+                if (!commonAssetName.equals(normalizedName)) {
+                    commonAssetModule.addCommonAsset(
+                            assetPackName,
+                            new ModuleUiCommonAsset(normalizedName, bytes),
+                            true
+                    );
+                }
+                getLogger().at(Level.INFO).log("Registered module UI document " + normalizedName +
+                        " for " + descriptor.id() + " from " + normalizedPath +
+                        " as common asset " + commonAssetName);
+                return new TSEUiDocument(normalizedName, normalizedPath);
+            } catch (IOException ex) {
+                throw new IllegalStateException("Unable to load module UI resource " + normalizedPath +
+                        " for " + descriptor.id() + ".", ex);
+            }
+        }
+
+        @Override
         public void registerCommand(AbstractCommand command) {
             registerModuleCommand(command);
         }
 
         @Override
+        public void registerEntitySystem(EntityEventSystem<EntityStore, ?> system) {
+            registerModuleEntitySystem(system);
+        }
+
+        @Override
         public EventRegistry eventRegistry() {
             return getEventRegistry();
+        }
+
+        private String normalizeUiDocumentName(String documentName) {
+            if (documentName == null || documentName.isBlank()) {
+                throw new IllegalArgumentException("UI document name is required.");
+            }
+            String normalizedName = documentName.trim().replace('\\', '/');
+            if (normalizedName.contains("/") || normalizedName.contains("..")
+                    || !normalizedName.toLowerCase(Locale.ROOT).endsWith(".ui")) {
+                throw new IllegalArgumentException("Invalid UI document name: " + documentName);
+            }
+            return normalizedName;
+        }
+
+        private String normalizeUiResourcePath(String resourcePath) {
+            if (resourcePath == null || resourcePath.isBlank()) {
+                throw new IllegalArgumentException("UI resource path is required.");
+            }
+            String normalizedPath = resourcePath.trim().replace('\\', '/');
+            if (normalizedPath.startsWith("/") || normalizedPath.contains(":") || normalizedPath.contains("//")) {
+                throw new IllegalArgumentException("Invalid UI resource path: " + resourcePath);
+            }
+            for (String part : normalizedPath.split("/")) {
+                if (part.isBlank() || ".".equals(part) || "..".equals(part)) {
+                    throw new IllegalArgumentException("Invalid UI resource path: " + resourcePath);
+                }
+            }
+            if (!normalizedPath.toLowerCase(Locale.ROOT).endsWith(".ui")) {
+                throw new IllegalArgumentException("UI resource path must end with .ui: " + resourcePath);
+            }
+            return normalizedPath;
+        }
+
+        private String toCommonAssetName(String normalizedResourcePath) {
+            String commonPrefix = "Common/";
+            if (normalizedResourcePath.startsWith(commonPrefix)) {
+                return normalizedResourcePath.substring(commonPrefix.length());
+            }
+            return normalizedResourcePath;
         }
     }
 
@@ -350,22 +431,6 @@ public class TSEssentials extends JavaPlugin {
         return teleportRequestManager;
     }
 
-    public ChatChannelConfig getChatChannelData() {
-        return chatChannelData;
-    }
-
-    public ChannelManager getChannelManager() {
-        return channelManager;
-    }
-
-    public ChatService getChatService() {
-        return chatService;
-    }
-
-    public ComponentType<EntityStore, PlayerChatSettingsComponent> getPlayerChatSettingsComponentType() {
-        return playerChatSettingsComponentType;
-    }
-
     public HomeService getHomeService() {
         return homeService;
     }
@@ -374,15 +439,4 @@ public class TSEssentials extends JavaPlugin {
         return playerHomesComponentType;
     }
 
-    public EconomyManager getEconomyManager() {
-        return economyManager;
-    }
-
-    public EconomyService getEconomyService() {
-        return economyService;
-    }
-
-    public ComponentType<EntityStore, PlayerEconomyComponent> getPlayerEconomyComponentType() {
-        return playerEconomyComponentType;
-    }
 }

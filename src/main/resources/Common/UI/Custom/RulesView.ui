@@ -1,0 +1,45 @@
+$C = "Common.ui";
+
+@RuleLabel = Label {
+  Anchor: (Height: 34, Bottom: 5);
+  Padding: (Horizontal: 10);
+  Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center, Wrap: true);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #RulesPanel {
+    Anchor: (Width: 760, Height: 560);
+    Background: #111111(0.90);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 18);
+
+    Label #Title {
+      Anchor: (Height: 42, Bottom: 14);
+      Style: (FontSize: 24, RenderBold: true, TextColor: #f1ba50, VerticalAlignment: Center);
+      Text: "Server Rules";
+    }
+
+    Label #EmptyMessage {
+      Anchor: (Height: 34, Bottom: 10);
+      Visible: false;
+      Text: "No rules have been configured.";
+      Style: (FontSize: 15, RenderBold: true, TextColor: #ffb4b4, VerticalAlignment: Center);
+    }
+
+    @RuleLabel #RuleRow0 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow1 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow2 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow3 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow4 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow5 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow6 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow7 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow8 { Text: ""; Visible: false; }
+    @RuleLabel #RuleRow9 { Text: ""; Visible: false; }
+  }
+}

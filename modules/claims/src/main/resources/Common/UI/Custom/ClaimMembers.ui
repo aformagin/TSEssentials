@@ -1,0 +1,142 @@
+$C = "Common.ui";
+
+@FieldLabel = Label {
+  Anchor: (Height: 20, Bottom: 4);
+  Style: (FontSize: 12, RenderBold: true, RenderUppercase: true, TextColor: #bbbbbb);
+};
+
+@SectionTitle = Label {
+  Anchor: (Height: 26, Bottom: 8);
+  Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #f1ba50, VerticalAlignment: Center);
+};
+
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #ClaimMembersPanel {
+    Anchor: (Width: 1120, Height: 720);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #Title {
+        FlexWeight: 1;
+        Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "TSClaims Members";
+      }
+
+      Label #StatusMessage {
+        Anchor: (Width: 410, Height: 34);
+        Padding: (Horizontal: 10);
+        Visible: false;
+        Style: (FontSize: 13, RenderBold: true, TextColor: #bdf2c3, VerticalAlignment: Center, Wrap: true);
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      LayoutMode: Left;
+
+      Group #LeftPane {
+        Anchor: (Width: 340);
+        Background: #252525(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 14);
+
+        @SectionTitle { Text: "Claims"; }
+
+        Group #ClaimList {
+          FlexWeight: 1;
+          LayoutMode: Top;
+          Padding: (Right: 6);
+
+          $C.@TextButton #ClaimRow0 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow1 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow2 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow3 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow4 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow5 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow6 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow7 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow8 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+          $C.@TextButton #ClaimRow9 { @Anchor = (Height: 38, Bottom: 5); Text: ""; Visible: false; }
+        }
+      }
+
+      Group #RightPane {
+        FlexWeight: 1;
+        Background: #414141(0.92);
+        LayoutMode: Top;
+        Padding: (Full: 22);
+
+        Label #SelectedTitle {
+          Anchor: (Height: 38, Bottom: 8);
+          Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "No claim selected";
+        }
+
+        Label #OwnerText {
+          Anchor: (Height: 26, Bottom: 4);
+          Style: (FontSize: 14, TextColor: #ffffff, VerticalAlignment: Center);
+          Text: "";
+        }
+
+        Label #BoundsText {
+          Anchor: (Height: 32, Bottom: 14);
+          Style: (FontSize: 13, TextColor: #dddddd, VerticalAlignment: Center, Wrap: true);
+          Text: "";
+        }
+
+        Group #MembersAndForm {
+          FlexWeight: 1;
+          LayoutMode: Left;
+
+          Group #MemberPane {
+            Anchor: (Width: 360, Right: 18);
+            LayoutMode: Top;
+
+            @SectionTitle { Text: "Trusted Members"; }
+
+            $C.@TextButton #MemberRow0 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow1 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow2 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow3 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow4 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow5 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow6 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow7 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow8 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+            $C.@TextButton #MemberRow9 { @Anchor = (Height: 36, Bottom: 5); Text: ""; Visible: false; }
+          }
+
+          Group #EditPane {
+            FlexWeight: 1;
+            LayoutMode: Top;
+
+            @FieldLabel { Text: "Online Player"; }
+            $C.@TextField #PlayerInput { @Anchor = (Height: 38, Bottom: 14); }
+
+            $C.@TextButton #AddButton {
+              @Anchor = (Height: 38, Bottom: 10);
+              Text: "Add Trusted";
+            }
+
+            $C.@CancelTextButton #RemoveButton {
+              @Anchor = (Height: 38);
+              Text: "Remove Selected";
+            }
+          }
+        }
+      }
+    }
+  }
+}
