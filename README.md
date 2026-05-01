@@ -46,6 +46,18 @@ To install an optional module:
 | **Chat** | Multi-channel chat, range-based local chat, nicknames, and mutes. | `mvn -f modules/chat/pom.xml clean package` |
 | **Permissions** | Group-based permissions, user records, and an in-game admin UI. | `mvn -f modules/permissions/pom.xml clean package` |
 
+### Chat Admin Commands
+
+-   `/chadmin create <name> [prefix] [color]`
+    -   **Description:** Creates a new chat channel.
+    -   **Usage:** `/chadmin create trade [&aTRADE] green`
+-   `/chadmin delete <name>`
+    -   **Description:** Deletes a chat channel.
+    -   **Usage:** `/chadmin delete trade`
+-   `/chadmin set <name> <property> <value>`
+    -   **Description:** Modifies a property of a channel, such as making it ranged.
+    -   **Usage:** `/chadmin set local range 100`
+
 ## Configuration Files
 
 The plugin and its modules generate configuration files in the server's data directory.
