@@ -15,11 +15,13 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.chat.ChannelManager;
 import com.thirdspare.modules.chat.data.ChatChannel;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Objects;
 
 public class ChatEditPage extends InteractiveCustomUIPage<ChatEditPage.ChatEditEventData> {
     private static final int MAX_VISIBLE_CHANNEL_ROWS = 10;
@@ -35,19 +37,21 @@ public class ChatEditPage extends InteractiveCustomUIPage<ChatEditPage.ChatEditE
     };
 
     private final ChannelManager channelManager;
+    private final TSEUiDocument uiDocument;
     private String selectedChannelName;
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public ChatEditPage(PlayerRef playerRef, ChannelManager channelManager) {
+    public ChatEditPage(PlayerRef playerRef, ChannelManager channelManager, TSEUiDocument uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, ChatEditEventData.CODEC);
         this.channelManager = channelManager;
+        this.uiDocument = Objects.requireNonNull(uiDocument, "uiDocument");
     }
 
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        builder.append("ChatEdit.ui");
+        uiDocument.appendTo(builder);
         ensureSelection();
         render(builder, events);
     }

@@ -9,6 +9,7 @@ import com.thirdspare.modules.permissions.PermissionsManager;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.TSEPermissionsNodes;
 import com.thirdspare.modules.permissions.data.PermissionsGroup;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -16,16 +17,18 @@ import java.util.concurrent.CompletableFuture;
 
 public class PermissionsCommand extends AbstractCommand {
     private final PermissionsService service;
+    private final TSEUiDocument adminUi;
     private final OptionalArg<String> areaArg;
     private final OptionalArg<String> actionArg;
     private final OptionalArg<String> targetArg;
     private final OptionalArg<String> valueArg;
     private final OptionalArg<String> extraArg;
 
-    public PermissionsCommand(PermissionsService service) {
+    public PermissionsCommand(PermissionsService service, TSEUiDocument adminUi) {
         super("tsperm", "Manage TSEssentials permissions");
         requirePermission(TSEPermissionsNodes.UI);
         this.service = service;
+        this.adminUi = adminUi;
         this.areaArg = withOptionalArg("area", "group, user, test, reload", ArgTypes.STRING);
         this.actionArg = withOptionalArg("action", "Action", ArgTypes.STRING);
         this.targetArg = withOptionalArg("target", "Group, player, or UUID", ArgTypes.STRING);
@@ -37,7 +40,7 @@ public class PermissionsCommand extends AbstractCommand {
     protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
         String area = lower(context.get(areaArg));
         if (area.isBlank()) {
-            PermissionsUICommand.openPage(context, service);
+            PermissionsUICommand.openPage(context, service, adminUi);
             return CompletableFuture.completedFuture(null);
         }
 

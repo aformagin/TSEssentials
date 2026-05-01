@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.economy.EconomyManager;
 import com.thirdspare.modules.economy.EconomyService;
 import com.thirdspare.permissions.TSEssentialsPermissions;
@@ -23,6 +24,7 @@ import com.thirdspare.utils.CommandUtils;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class EconomyAdminPage extends InteractiveCustomUIPage<EconomyAdminPage.EconomyAdminEventData> {
     private static final int MAX_VISIBLE_ACCOUNT_ROWS = 10;
@@ -30,21 +32,23 @@ public class EconomyAdminPage extends InteractiveCustomUIPage<EconomyAdminPage.E
     private final PlayerRef playerRef;
     private final EconomyService economyService;
     private final EconomyManager economyManager;
+    private final TSEUiDocument uiDocument;
     private String selectedTarget = "";
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public EconomyAdminPage(PlayerRef playerRef, EconomyService economyService) {
+    public EconomyAdminPage(PlayerRef playerRef, EconomyService economyService, TSEUiDocument uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, EconomyAdminEventData.CODEC);
         this.playerRef = playerRef;
         this.economyService = economyService;
         this.economyManager = economyService.getEconomyManager();
+        this.uiDocument = Objects.requireNonNull(uiDocument, "uiDocument");
     }
 
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        builder.append("EconomyAdmin.ui");
+        uiDocument.appendTo(builder);
         ensureSelection();
         render(builder, events);
     }

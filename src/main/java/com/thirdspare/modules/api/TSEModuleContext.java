@@ -29,6 +29,8 @@ public interface TSEModuleContext {
             BuilderCodec<T> codec
     );
 
+    TSEUiDocument registerUiDocument(String documentName, String resourcePath);
+
     void registerCommand(AbstractCommand command);
 
     EventRegistry eventRegistry();

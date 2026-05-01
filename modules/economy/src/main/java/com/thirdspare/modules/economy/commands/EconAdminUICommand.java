@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.economy.EconomyService;
 import com.thirdspare.modules.economy.ui.EconomyAdminPage;
 import com.thirdspare.permissions.TSEssentialsPermissions;
@@ -16,11 +17,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class EconAdminUICommand extends AbstractCommand {
     private final EconomyService economyService;
+    private final TSEUiDocument economyAdminUi;
 
-    public EconAdminUICommand(EconomyService economyService) {
+    public EconAdminUICommand(EconomyService economyService, TSEUiDocument economyAdminUi) {
         super("ecoui", "Open economy admin controls");
         requirePermission(TSEssentialsPermissions.ECO_ADMIN_UI);
         this.economyService = economyService;
+        this.economyAdminUi = economyAdminUi;
     }
 
     @Override
@@ -46,7 +49,8 @@ public class EconAdminUICommand extends AbstractCommand {
                 var store = ref.getStore();
                 Player playerComponent = store.getComponent(ref, Player.getComponentType());
                 if (playerComponent != null) {
-                    playerComponent.getPageManager().openCustomPage(ref, store, new EconomyAdminPage(player, economyService));
+                    playerComponent.getPageManager().openCustomPage(ref, store,
+                            new EconomyAdminPage(player, economyService, economyAdminUi));
                 }
             } catch (IllegalStateException ignored) {
                 // The player can leave before the queued UI open runs.

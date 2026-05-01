@@ -15,6 +15,7 @@ import com.thirdspare.modules.chat.ChannelManager;
 import com.thirdspare.modules.chat.TSEChatPermissionsNodes;
 import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.modules.chat.ui.ChatEditPage;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -27,10 +28,12 @@ public class ChatEditCommand extends AbstractCommand {
     private final OptionalArg<String> valueArg;
     private final OptionalArg<String> value2Arg;
     private final OptionalArg<String> value3Arg;
+    private final TSEUiDocument chatEditUi;
 
-    public ChatEditCommand(ChannelManager channelManager) {
+    public ChatEditCommand(ChannelManager channelManager, TSEUiDocument chatEditUi) {
         super("chatedit", "Edit chat channels");
         this.channelManager = channelManager;
+        this.chatEditUi = chatEditUi;
         requirePermission(TSEChatPermissionsNodes.CHAT_EDIT);
         this.actionArg = withOptionalArg("action", "list, create, delete, prefix, color, range, permission, default", ArgTypes.STRING);
         this.channelArg = withOptionalArg("channel", "Channel name", ArgTypes.STRING);
@@ -103,7 +106,8 @@ public class ChatEditCommand extends AbstractCommand {
                 var store = ref.getStore();
                 Player playerComponent = store.getComponent(ref, Player.getComponentType());
                 if (playerComponent != null) {
-                    playerComponent.getPageManager().openCustomPage(ref, store, new ChatEditPage(player, channelManager));
+                    playerComponent.getPageManager().openCustomPage(ref, store,
+                            new ChatEditPage(player, channelManager, chatEditUi));
                 }
             } catch (IllegalStateException ignored) {
                 // The player can leave before the queued UI open runs.

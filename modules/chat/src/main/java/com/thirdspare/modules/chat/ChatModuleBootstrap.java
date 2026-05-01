@@ -9,6 +9,7 @@ import com.thirdspare.modules.api.TSEModule;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
 import com.thirdspare.modules.api.TSEPlayerChatEventHandler;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.core.PermissionCatalogContributor;
 import com.thirdspare.modules.core.PermissionNodeDescriptor;
 import com.thirdspare.modules.chat.commands.ChannelCommand;
@@ -57,6 +58,10 @@ public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler
 
         ChannelManager channelManager = new ChannelManager(chatConfig, chatChannels);
         chatService = new ChatService(channelManager, componentType);
+        TSEUiDocument chatEditUi = context.registerUiDocument(
+                "ChatEdit.ui",
+                "Common/UI/Custom/ChatEdit.ui"
+        );
 
         context.registerCommand(new ChannelCommand(chatService));
         context.registerCommand(new ChannelMessageCommand("g", "Send a global chat message", ChannelManager.GLOBAL, chatService));
@@ -66,7 +71,7 @@ public class ChatModuleBootstrap implements TSEModule, TSEPlayerChatEventHandler
         context.registerCommand(new IgnoreCommand("unignore", "Stop ignoring a player's chat messages", false, chatService));
         context.registerCommand(new NickCommand(chatService));
         context.registerCommand(new NickColorCommand(chatService));
-        context.registerCommand(new ChatEditCommand(channelManager));
+        context.registerCommand(new ChatEditCommand(channelManager, chatEditUi));
         context.logger().at(Level.INFO).log("Registered optional TSE chat module with " +
                 channelManager.getChannels().size() + " chat channels.");
     }

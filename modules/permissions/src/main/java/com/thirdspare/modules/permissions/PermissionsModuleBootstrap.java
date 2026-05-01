@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.util.Config;
 import com.thirdspare.modules.api.TSEModule;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.permissions.commands.PermissionsCommand;
 import com.thirdspare.modules.permissions.commands.PermissionsUICommand;
 import com.thirdspare.modules.permissions.component.PlayerPermissionMembershipComponent;
@@ -47,8 +48,12 @@ public class PermissionsModuleBootstrap implements TSEModule {
         nodeRegistry.registerAll(context.core().getModuleLoader().permissionNodes());
         service = new PermissionsService(manager, componentType, nodeRegistry);
         provider = new TSEPermissionsProvider(service);
-        context.registerCommand(new PermissionsCommand(service));
-        context.registerCommand(new PermissionsUICommand(service));
+        TSEUiDocument permissionsAdminUi = context.registerUiDocument(
+                "PermissionsAdmin.ui",
+                "Common/UI/Custom/PermissionsAdmin.ui"
+        );
+        context.registerCommand(new PermissionsCommand(service, permissionsAdminUi));
+        context.registerCommand(new PermissionsUICommand(service, permissionsAdminUi));
         context.logger().at(Level.INFO).log("Registered optional TSE permissions module.");
     }
 

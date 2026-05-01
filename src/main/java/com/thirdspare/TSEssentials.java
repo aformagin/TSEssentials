@@ -5,6 +5,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.event.EventRegistry;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.asset.common.CommonAssetModule;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
@@ -34,14 +35,20 @@ import com.thirdspare.core.warps.data.WarpConfig;
 import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.modules.api.TSEModuleContext;
 import com.thirdspare.modules.api.TSEModuleDescriptor;
+import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.core.ModuleLoader;
 import com.thirdspare.modules.core.ModulePaths;
+import com.thirdspare.modules.core.ModuleUiCommonAsset;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.Teleportation;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 public class TSEssentials extends JavaPlugin {
@@ -204,16 +211,19 @@ public class TSEssentials extends JavaPlugin {
         } catch (Exception ex) {
             getLogger().at(Level.WARNING).log("Unable to create module data directory " + dataDirectory + ": " + ex.getMessage());
         }
-        return new CoreModuleContext(jarPath, dataDirectory);
+        return new CoreModuleContext(jarPath, dataDirectory, descriptor);
     }
 
     private final class CoreModuleContext implements TSEModuleContext {
+        private static final long MAX_UI_DOCUMENT_BYTES = 256L * 1024L;
         private final Path moduleJarPath;
         private final Path moduleDataDirectory;
+        private final TSEModuleDescriptor descriptor;
 
-        private CoreModuleContext(Path moduleJarPath, Path moduleDataDirectory) {
+        private CoreModuleContext(Path moduleJarPath, Path moduleDataDirectory, TSEModuleDescriptor descriptor) {
             this.moduleJarPath = moduleJarPath;
             this.moduleDataDirectory = moduleDataDirectory;
+            this.descriptor = descriptor;
         }
 
         @Override
@@ -259,6 +269,50 @@ public class TSEssentials extends JavaPlugin {
         }
 
         @Override
+        public TSEUiDocument registerUiDocument(String documentName, String resourcePath) {
+            String normalizedPath = normalizeUiResourcePath(resourcePath);
+            String normalizedName = normalizeUiDocumentName(documentName);
+            try (JarFile jarFile = new JarFile(moduleJarPath.toFile())) {
+                JarEntry entry = jarFile.getJarEntry(normalizedPath);
+                if (entry == null || entry.isDirectory()) {
+                    throw new IllegalArgumentException("Module UI resource not found: " + normalizedPath);
+                }
+                if (entry.getSize() > MAX_UI_DOCUMENT_BYTES) {
+                    throw new IllegalArgumentException("Module UI resource is too large: " + normalizedPath);
+                }
+                byte[] bytes;
+                try (var input = jarFile.getInputStream(entry)) {
+                    bytes = input.readAllBytes();
+                }
+                if (bytes.length > MAX_UI_DOCUMENT_BYTES) {
+                    throw new IllegalArgumentException("Module UI resource is too large: " + normalizedPath);
+                }
+                String assetPackName = "TSEssentials:" + descriptor.id();
+                String commonAssetName = toCommonAssetName(normalizedPath);
+                CommonAssetModule commonAssetModule = CommonAssetModule.get();
+                commonAssetModule.addCommonAsset(
+                        assetPackName,
+                        new ModuleUiCommonAsset(commonAssetName, bytes),
+                        true
+                );
+                if (!commonAssetName.equals(normalizedName)) {
+                    commonAssetModule.addCommonAsset(
+                            assetPackName,
+                            new ModuleUiCommonAsset(normalizedName, bytes),
+                            true
+                    );
+                }
+                getLogger().at(Level.INFO).log("Registered module UI document " + normalizedName +
+                        " for " + descriptor.id() + " from " + normalizedPath +
+                        " as common asset " + commonAssetName);
+                return new TSEUiDocument(normalizedName, normalizedPath);
+            } catch (IOException ex) {
+                throw new IllegalStateException("Unable to load module UI resource " + normalizedPath +
+                        " for " + descriptor.id() + ".", ex);
+            }
+        }
+
+        @Override
         public void registerCommand(AbstractCommand command) {
             registerModuleCommand(command);
         }
@@ -266,6 +320,45 @@ public class TSEssentials extends JavaPlugin {
         @Override
         public EventRegistry eventRegistry() {
             return getEventRegistry();
+        }
+
+        private String normalizeUiDocumentName(String documentName) {
+            if (documentName == null || documentName.isBlank()) {
+                throw new IllegalArgumentException("UI document name is required.");
+            }
+            String normalizedName = documentName.trim().replace('\\', '/');
+            if (normalizedName.contains("/") || normalizedName.contains("..")
+                    || !normalizedName.toLowerCase(Locale.ROOT).endsWith(".ui")) {
+                throw new IllegalArgumentException("Invalid UI document name: " + documentName);
+            }
+            return normalizedName;
+        }
+
+        private String normalizeUiResourcePath(String resourcePath) {
+            if (resourcePath == null || resourcePath.isBlank()) {
+                throw new IllegalArgumentException("UI resource path is required.");
+            }
+            String normalizedPath = resourcePath.trim().replace('\\', '/');
+            if (normalizedPath.startsWith("/") || normalizedPath.contains(":") || normalizedPath.contains("//")) {
+                throw new IllegalArgumentException("Invalid UI resource path: " + resourcePath);
+            }
+            for (String part : normalizedPath.split("/")) {
+                if (part.isBlank() || ".".equals(part) || "..".equals(part)) {
+                    throw new IllegalArgumentException("Invalid UI resource path: " + resourcePath);
+                }
+            }
+            if (!normalizedPath.toLowerCase(Locale.ROOT).endsWith(".ui")) {
+                throw new IllegalArgumentException("UI resource path must end with .ui: " + resourcePath);
+            }
+            return normalizedPath;
+        }
+
+        private String toCommonAssetName(String normalizedResourcePath) {
+            String commonPrefix = "Common/";
+            if (normalizedResourcePath.startsWith(commonPrefix)) {
+                return normalizedResourcePath.substring(commonPrefix.length());
+            }
+            return normalizedResourcePath;
         }
     }
 
