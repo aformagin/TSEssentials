@@ -103,12 +103,12 @@ Group {
           @FieldLabel { Anchor: (Width: 120, Height: 44); Text: "Claim name:"; }
 
           $C.@TextField #NameInput {
-            FlexWeight: 1;
             @Anchor = (Height: 38, Right: 10);
+            FlexWeight: 1;
           }
 
           $C.@TextButton #CreateButton {
-            Anchor: (Width: 140, Height: 38);
+            @Anchor = (Width: 140, Height: 38);
             Text: "Create from Selection";
           }
         }
@@ -118,13 +118,13 @@ Group {
           LayoutMode: Left;
 
           $C.@CancelTextButton #DeleteButton {
-            Anchor: (Width: 160, Height: 38, Right: 10);
+            @Anchor = (Width: 160, Height: 38, Right: 10);
             Text: "Delete Claim";
             Visible: false;
           }
 
           $C.@TextButton #MembersButton {
-            Anchor: (Width: 160, Height: 38);
+            @Anchor = (Width: 160, Height: 38);
             Text: "Manage Members";
             Visible: false;
           }
