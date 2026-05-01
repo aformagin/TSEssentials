@@ -187,3 +187,82 @@ When completing a task, respond with:
 - [Economy Plugin](https://github.com/Ryukazan/Economy) - Custom component example (MoneyComponent)
 - [Essentials Plugin](https://github.com/nhulston/Essentials) - Full essentials plugin with GlobalSpawnProvider usage
 
+---
+
+## 12. UI Styling Paradigms
+
+All UI documents (`.ui` files) should follow these styling and layout conventions to ensure a consistent look and feel across the plugin.
+
+### 12.1. Panel Sizing & Layout
+- **Standard Admin/View Panel:** `Width: 760, Height: 560`
+- **Large Management Panel:** `Width: 1120, Height: 720`
+- **Main Overlay Background:** `#000000(0.35)`
+- **Main Panel Background:** `#111111(0.90)`
+- **Outlines:** `OutlineSize: 1`, `OutlineColor: #ffffff(0.18)`
+- **Padding:** Standard `Full: 18` for main containers.
+
+### 12.2. Typography & Colors
+- **Main Titles:** `FontSize: 24`, `TextColor: #ffffff` or `#f1ba50` (Gold), `RenderBold: true`.
+- **Section Titles:** `FontSize: 14`, `TextColor: #f1ba50`, `RenderBold: true`, `RenderUppercase: true`.
+- **Field Labels:** `FontSize: 12`, `TextColor: #bbbbbb`, `RenderUppercase: true`.
+- **Body Text:** `FontSize: 15`, `TextColor: #ffffff`.
+- **Status/Success Messages:** `TextColor: #bdf2c3`.
+- **Error Messages:** `TextColor: #ffb4b4`.
+
+### 12.3. Common Background Colors
+- **Header:** `#343434(0.92)`
+- **Sidebar/Left Pane:** `#252525(0.92)`
+- **Content/Right Pane:** `#414141(0.92)`
+
+---
+
+## 13. Command Structure Standards
+
+To ensure type safety and avoid parameter naming mix-ups, all future commands and subcommands MUST follow this structure:
+
+1. **Argument Declaration:** Declare all `RequiredArg` and `OptionalArg` as `private final` fields.
+2. **Initialization:** Initialize arguments in the constructor using `withRequiredArg(name, description, type)` or `withOptionalArg(...)`.
+3. **Retrieval:** ALWAYS use the argument object to retrieve values from the `CommandContext`. Never use string literals.
+
+**Example:**
+```java
+public class ExampleSubCommand extends AbstractCommand {
+    private final RequiredArg<String> nameArg;
+
+    public ExampleSubCommand() {
+        super("create", "Create something");
+        // Initialize argument
+        this.nameArg = withRequiredArg("name", "Name of the object", ArgTypes.STRING);
+    }
+
+    @Override
+    protected CompletableFuture<Void> execute(CommandContext context) {
+        // Retrieve value using the field
+        String name = context.get(nameArg);
+        // ...
+        return CompletableFuture.completedFuture(null);
+    }
+}
+```
+
+---
+
+## 14. Modular System Design
+
+TSEssentials uses a "drop-in" module system allowing optional features to be added as separate JAR files.
+
+### 14.1. Architecture
+- **API Entry Point:** `com.thirdspare.modules.api.TSEModule`
+- **Discovery:** Uses Java's `ServiceLoader`. Modules must provide a service file in `META-INF/services/com.thirdspare.modules.api.TSEModule`.
+- **Isolation:** Each module is loaded into its own classloader to prevent dependency conflicts.
+
+### 14.2. Lifecycle Hooks
+- `register(TSEModuleContext context)`: Primary setup phase. Register configs, commands, and ECS components here.
+- `enable()`: Called after all modules are registered. Activate main logic/listeners here.
+- `disable()`: Cleanup phase. Unregister listeners and clear temporary state.
+
+### 14.3. Module Packaging
+- JAR files must be placed in the `TSEssentialsModules` directory.
+- JAR names should follow the pattern `TSEssentials-<ModuleName>-<Version>.jar`.
+- Module configurations are automatically isolated to `UserData/ModData/TSEssentials/modules/<module-id>/`.
+
