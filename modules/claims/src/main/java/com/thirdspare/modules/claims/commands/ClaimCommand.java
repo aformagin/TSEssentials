@@ -4,12 +4,14 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.thirdspare.modules.api.TSEUiDocument;
+import com.thirdspare.modules.claims.ClaimsPermissionNodes;
 import com.thirdspare.modules.claims.ClaimsService;
 import com.thirdspare.modules.claims.data.ClaimDefinition;
 import com.thirdspare.utils.CommandUtils;
@@ -27,19 +29,24 @@ public class ClaimCommand extends AbstractCommand {
 
     private final ClaimsService claimsService;
     private final TSEUiDocument membersUi;
-    private final OptionalArg<String> actionArg;
-    private final OptionalArg<String> nameArg;
-    private final OptionalArg<String> valueArg;
 
     public ClaimCommand(ClaimsService claimsService, TSEUiDocument membersUi) {
         super("claim", "Manage land claims");
+        requirePermission(ClaimsPermissionNodes.COMMAND);
         this.claimsService = claimsService;
         this.membersUi = membersUi;
-        this.actionArg = withOptionalArg("action",
-                "pos1, pos2, clear, create, list, info, delete, trust, untrust, members, bypass",
-                ArgTypes.STRING);
-        this.nameArg = withOptionalArg("name", "Claim or player name", ArgTypes.STRING);
-        this.valueArg = withOptionalArg("value", "Optional claim name", ArgTypes.STRING);
+
+        addSubCommand(new PosSubCommand("pos1", 1));
+        addSubCommand(new PosSubCommand("pos2", 2));
+        addSubCommand(new ClearSubCommand());
+        addSubCommand(new CreateSubCommand());
+        addSubCommand(new ListSubCommand());
+        addSubCommand(new InfoSubCommand());
+        addSubCommand(new DeleteSubCommand());
+        addSubCommand(new TrustSubCommand());
+        addSubCommand(new UntrustSubCommand());
+        addSubCommand(new MembersSubCommand());
+        addSubCommand(new BypassSubCommand());
     }
 
     @Override
@@ -47,32 +54,7 @@ public class ClaimCommand extends AbstractCommand {
         PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
         if (player == null) return CompletableFuture.completedFuture(null);
 
-        String action = context.get(actionArg);
-        String name = context.get(nameArg);
-        String value = context.get(valueArg);
-
-        if (action == null || action.isBlank() || action.equalsIgnoreCase("list")) {
-            listClaims(player);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        String error = switch (action.toLowerCase()) {
-            case "pos1" -> setCorner(player, 1);
-            case "pos2" -> setCorner(player, 2);
-            case "clear" -> { clearSelection(player); yield null; }
-            case "create" -> createClaim(player, name);
-            case "info" -> { showInfo(player, name); yield null; }
-            case "delete" -> deleteClaim(player, name);
-            case "trust" -> trust(player, name, value);
-            case "untrust" -> untrust(player, name, value);
-            case "members" -> { openMembersPage(player, name); yield null; }
-            case "bypass" -> toggleBypass(player);
-            default -> "Usage: /claim [pos1|pos2|clear|create|list|info|delete|trust|untrust|members|bypass]";
-        };
-
-        if (error != null) {
-            player.sendMessage(Message.raw(error).color(COLOR_ERROR));
-        }
+        listClaims(player);
         return CompletableFuture.completedFuture(null);
     }
 
@@ -233,5 +215,164 @@ public class ClaimCommand extends AbstractCommand {
             }
         }
         return null;
+    }
+
+    private void sendError(PlayerRef player, String error) {
+        if (error != null) {
+            player.sendMessage(Message.raw(error).color(COLOR_ERROR));
+        }
+    }
+
+    private abstract class PlayerSubCommand extends AbstractCommand {
+        private PlayerSubCommand(String name, String description, String permission) {
+            super(name, description);
+            requirePermission(permission);
+        }
+
+        @Override
+        protected final CompletableFuture<Void> execute(@Nonnull CommandContext context) {
+            PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
+            if (player != null) {
+                executeForPlayer(context, player);
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+
+        protected abstract void executeForPlayer(CommandContext context, PlayerRef player);
+    }
+
+    private final class PosSubCommand extends PlayerSubCommand {
+        private final int corner;
+
+        private PosSubCommand(String name, int corner) {
+            super(name, "Set claim corner " + corner, ClaimsPermissionNodes.CREATE);
+            this.corner = corner;
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            setCorner(player, corner);
+        }
+    }
+
+    private final class ClearSubCommand extends PlayerSubCommand {
+        private ClearSubCommand() {
+            super("clear", "Clear your active claim selection", ClaimsPermissionNodes.CREATE);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            clearSelection(player);
+        }
+    }
+
+    private final class CreateSubCommand extends PlayerSubCommand {
+        private final RequiredArg<String> nameArg;
+
+        private CreateSubCommand() {
+            super("create", "Create a claim from your selected corners", ClaimsPermissionNodes.CREATE);
+            this.nameArg = withRequiredArg("name", "Claim name", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            sendError(player, createClaim(player, context.get(nameArg)));
+        }
+    }
+
+    private final class ListSubCommand extends PlayerSubCommand {
+        private ListSubCommand() {
+            super("list", "List claims you manage", ClaimsPermissionNodes.COMMAND);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            listClaims(player);
+        }
+    }
+
+    private final class InfoSubCommand extends PlayerSubCommand {
+        private final OptionalArg<String> claimArg;
+
+        private InfoSubCommand() {
+            super("info", "Show information about a claim", ClaimsPermissionNodes.INFO);
+            this.claimArg = withOptionalArg("claim", "Claim name, defaults to current location", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            showInfo(player, context.get(claimArg));
+        }
+    }
+
+    private final class DeleteSubCommand extends PlayerSubCommand {
+        private final OptionalArg<String> claimArg;
+
+        private DeleteSubCommand() {
+            super("delete", "Delete one of your claims", ClaimsPermissionNodes.DELETE);
+            this.claimArg = withOptionalArg("claim", "Claim name, defaults to current location", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            sendError(player, deleteClaim(player, context.get(claimArg)));
+        }
+    }
+
+    private final class TrustSubCommand extends PlayerSubCommand {
+        private final RequiredArg<String> playerArg;
+        private final OptionalArg<String> claimArg;
+
+        private TrustSubCommand() {
+            super("trust", "Trust a player on a claim", ClaimsPermissionNodes.TRUST);
+            this.playerArg = withRequiredArg("player", "Online player to trust", ArgTypes.STRING);
+            this.claimArg = withOptionalArg("claim", "Claim name, defaults to current location", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            sendError(player, trust(player, context.get(playerArg), context.get(claimArg)));
+        }
+    }
+
+    private final class UntrustSubCommand extends PlayerSubCommand {
+        private final RequiredArg<String> playerArg;
+        private final OptionalArg<String> claimArg;
+
+        private UntrustSubCommand() {
+            super("untrust", "Remove a trusted player from a claim", ClaimsPermissionNodes.TRUST);
+            this.playerArg = withRequiredArg("player", "Player name or UUID to untrust", ArgTypes.STRING);
+            this.claimArg = withOptionalArg("claim", "Claim name, defaults to current location", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            sendError(player, untrust(player, context.get(playerArg), context.get(claimArg)));
+        }
+    }
+
+    private final class MembersSubCommand extends PlayerSubCommand {
+        private final OptionalArg<String> claimArg;
+
+        private MembersSubCommand() {
+            super("members", "Open claim member management", ClaimsPermissionNodes.TRUST);
+            this.claimArg = withOptionalArg("claim", "Claim name, defaults to current location", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            openMembersPage(player, context.get(claimArg));
+        }
+    }
+
+    private final class BypassSubCommand extends PlayerSubCommand {
+        private BypassSubCommand() {
+            super("bypass", "Toggle claim bypass mode", ClaimsPermissionNodes.BYPASS);
+        }
+
+        @Override
+        protected void executeForPlayer(CommandContext context, PlayerRef player) {
+            sendError(player, toggleBypass(player));
+        }
     }
 }

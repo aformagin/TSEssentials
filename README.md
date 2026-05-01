@@ -16,9 +16,11 @@ Designed with modularity and performance in mind, TSEssentials serves as the bac
 -   **Server Spawn:** A global spawn point that any player can teleport to.
 -   **Teleport Requests (TPA):** Players can request to teleport to each other.
 -   **Economy System (V1):** Digital currency system with player accounts and admin management.
+-   **Land Claims (V1):** Player-managed area protection with trusted member support.
 -   **Modular Extensions:** Optional drop-in modules for enhanced functionality.
     -   **Chat Channels (V1):** Joinable channels, range support, and nicknames.
     -   **Permissions (V1):** Group/node management with an in-game admin UI.
+    -   **Land Claims (V1):** Area protection and management.
 -   **Utility Tools:** Core commands for healing and item repair.
 -   **Concurrency & Safety:** World-thread safe commands.
 -   **Configuration:** Data stored in simple, human-readable JSON files.
@@ -45,6 +47,7 @@ To install an optional module:
 | :--- | :--- | :--- |
 | **Chat** | Multi-channel chat, range-based local chat, nicknames, and mutes. | `mvn -f modules/chat/pom.xml clean package` |
 | **Permissions** | Group-based permissions, user records, and an in-game admin UI. | `mvn -f modules/permissions/pom.xml clean package` |
+| **Claims** | Player-managed land claims and area protection. | `mvn -f modules/claims/pom.xml clean package` |
 
 ### Chat Admin Commands
 
@@ -65,6 +68,7 @@ The plugin and its modules generate configuration files in the server's data dir
 -   **Core:** `player_data.json`, `warp_data.json`, `spawn_data.json`
 -   **Chat Module:** `modules/chat/chat_channels.json`
 -   **Permissions Module:** `modules/permissions/permissions_groups.json`, `modules/permissions/permissions_users.json`
+-   **Claims Module:** `modules/claims/claims_data.json`
 
 ## Deployment
 

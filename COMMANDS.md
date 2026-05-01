@@ -115,3 +115,34 @@ These commands are only available when the corresponding module JAR is present i
     -   **Description:** Tests the effective permission result.
 -   `/tsperm reload`
     -   **Description:** Reloads local permissions configurations.
+
+### Claims Module Commands
+
+-   `/claim`
+    -   **Description:** Lists claims you manage.
+-   `/claim pos1`
+    -   **Description:** Sets the first corner of your claim selection at your current position.
+-   `/claim pos2`
+    -   **Description:** Sets the second corner of your claim selection at your current position.
+-   `/claim create <name>`
+    -   **Description:** Creates a new land claim using your current corner selection.
+-   `/claim info [claim]`
+    -   **Description:** Shows information about the claim at your location or the specified claim.
+-   `/claim delete [claim]`
+    -   **Description:** Deletes the specified claim or the claim at your location.
+-   `/claim trust <player> [claim]`
+    -   **Description:** Grants a player permission to build and interact within your claim.
+-   `/claim untrust <player> [claim]`
+    -   **Description:** Revokes a player's permissions on your claim.
+-   `/claim members [claim]`
+    -   **Description:** Opens the claim member management UI.
+-   `/claim clear`
+    -   **Description:** Clears your active corner selection.
+-   `/claim bypass`
+    -   **Description:** Toggles admin bypass mode to ignore claim protections.
+-   `/claimtrust <player> [claim]`
+    -   **Description:** Convenience alias for `/claim trust`.
+-   `/claimuntrust <player> [claim]`
+    -   **Description:** Convenience alias for `/claim untrust`.
+-   `/claimbypass`
+    -   **Description:** Convenience alias for `/claim bypass`.
