@@ -14,11 +14,6 @@ import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.commands.*;
 import com.thirdspare.commands.core.*;
-import com.thirdspare.commands.economy.BalanceCommand;
-import com.thirdspare.commands.economy.EcoCommand;
-import com.thirdspare.commands.economy.EconAdminUICommand;
-import com.thirdspare.commands.economy.WalletCommand;
-import com.thirdspare.commands.economy.PayCommand;
 import com.thirdspare.core.back.BackService;
 import com.thirdspare.core.flight.FlightService;
 import com.thirdspare.core.kits.KitManager;
@@ -31,14 +26,9 @@ import com.thirdspare.core.position.PositionService;
 import com.thirdspare.core.rules.RulesManager;
 import com.thirdspare.core.rules.data.RulesConfig;
 import com.thirdspare.core.teleport.TeleportAllService;
-import com.thirdspare.data.economy.EconomyAccountsConfig;
-import com.thirdspare.data.economy.EconomyConfig;
 import com.thirdspare.data.PlayerDataConfig;
 import com.thirdspare.data.SpawnConfig;
 import com.thirdspare.data.WarpConfig;
-import com.thirdspare.economy.EconomyManager;
-import com.thirdspare.economy.EconomyService;
-import com.thirdspare.economy.PlayerEconomyComponent;
 import com.thirdspare.events.ExampleEvent;
 import com.thirdspare.homes.HomeService;
 import com.thirdspare.homes.PlayerHomesComponent;
@@ -68,9 +58,6 @@ public class TSEssentials extends JavaPlugin {
     /* Spawn data configuration with codec-based JSON persistence */
     private final Config<SpawnConfig> spawnDataConfig = withConfig("spawn_data", SpawnConfig.CODEC);
 
-    /* Economy configuration and known account ledger */
-    private final Config<EconomyConfig> economyConfig = withConfig("economy_config", EconomyConfig.CODEC);
-    private final Config<EconomyAccountsConfig> economyAccountsConfig = withConfig("economy_accounts", EconomyAccountsConfig.CODEC);
     private final Config<MotdConfig> motdConfig = withConfig("motd_config", MotdConfig.CODEC);
     private final Config<RulesConfig> rulesConfig = withConfig("rules_config", RulesConfig.CODEC);
     private final Config<KitsConfig> kitsConfig = withConfig("kits_config", KitsConfig.CODEC);
@@ -78,13 +65,8 @@ public class TSEssentials extends JavaPlugin {
     private PlayerDataConfig playerData;
     private WarpConfig warpData;
     private SpawnConfig spawnData;
-    private EconomyConfig economyData;
-    private EconomyAccountsConfig economyAccountsData;
     private ComponentType<EntityStore, PlayerHomesComponent> playerHomesComponentType;
-    private ComponentType<EntityStore, PlayerEconomyComponent> playerEconomyComponentType;
     private HomeService homeService;
-    private EconomyManager economyManager;
-    private EconomyService economyService;
     private MotdManager motdManager;
     private RulesManager rulesManager;
     private KitManager kitManager;
@@ -109,12 +91,6 @@ public class TSEssentials extends JavaPlugin {
                         "TSEssentials_PlayerHomes",
                         PlayerHomesComponent.CODEC
                 );
-        playerEconomyComponentType = this.getEntityStoreRegistry()
-                .registerComponent(
-                        PlayerEconomyComponent.class,
-                        "TSEssentials_PlayerEconomy",
-                        PlayerEconomyComponent.CODEC
-                );
 
         /* Set up data directory - automatically handled by withConfig */
         /* This will create a data directory, player_data.json and warp_data.json files */
@@ -129,11 +105,6 @@ public class TSEssentials extends JavaPlugin {
         spawnData = spawnDataConfig.get();
         this.getLogger().at(Level.INFO).log("Server spawn " + (spawnData.hasSpawn() ? "loaded" : "not set"));
 
-        economyData = economyConfig.get();
-        economyAccountsData = economyAccountsConfig.get();
-        economyManager = new EconomyManager(economyConfig, economyData, economyAccountsConfig, economyAccountsData);
-        economyService = new EconomyService(economyManager, playerEconomyComponentType);
-        this.getLogger().at(Level.INFO).log("Loaded " + economyAccountsData.getAccounts().size() + " economy accounts");
         this.getLogger().at(Level.INFO).log("TSEssentials command permissions require grants such as " +
                 TSEssentialsPermissions.COMMAND_WILDCARD);
 
@@ -189,16 +160,9 @@ public class TSEssentials extends JavaPlugin {
         this.getCommandRegistry().registerCommand(new BackCommand(backService));
         this.getCommandRegistry().registerCommand(new TpAllCommand(teleportAllService));
 
-        this.getCommandRegistry().registerCommand(new BalanceCommand(economyService));
-        this.getCommandRegistry().registerCommand(new PayCommand(economyService));
-        this.getCommandRegistry().registerCommand(new WalletCommand(economyService));
-        this.getCommandRegistry().registerCommand(new EcoCommand(economyService));
-        this.getCommandRegistry().registerCommand(new EconAdminUICommand(economyService));
-
         /* Event Registry */
         this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
             ExampleEvent.onPlayerReady(event);
-            economyService.loadEconomy(event.getPlayer().getPlayerRef());
             motdManager.sendTo(event.getPlayer().getPlayerRef(), false);
             moduleLoader.onPlayerReady(event.getPlayer().getPlayerRef());
         });
@@ -373,15 +337,4 @@ public class TSEssentials extends JavaPlugin {
         return playerHomesComponentType;
     }
 
-    public EconomyManager getEconomyManager() {
-        return economyManager;
-    }
-
-    public EconomyService getEconomyService() {
-        return economyService;
-    }
-
-    public ComponentType<EntityStore, PlayerEconomyComponent> getPlayerEconomyComponentType() {
-        return playerEconomyComponentType;
-    }
 }

@@ -1,4 +1,4 @@
-package com.thirdspare.economy;
+package com.thirdspare.modules.economy;
 
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
@@ -7,8 +7,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.data.economy.EconomyAccount;
-import com.thirdspare.data.economy.EconomyAccountsConfig;
+import com.thirdspare.modules.economy.component.PlayerEconomyComponent;
+import com.thirdspare.modules.economy.data.EconomyAccount;
+import com.thirdspare.modules.economy.data.EconomyAccountsConfig;
 import com.thirdspare.utils.PlayerLookup;
 
 import java.util.ArrayList;

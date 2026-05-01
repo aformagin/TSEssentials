@@ -1,4 +1,4 @@
-package com.thirdspare.ui;
+package com.thirdspare.modules.economy.ui;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -15,8 +15,8 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.economy.EconomyManager;
-import com.thirdspare.economy.EconomyService;
+import com.thirdspare.modules.economy.EconomyManager;
+import com.thirdspare.modules.economy.EconomyService;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 import com.thirdspare.utils.CommandUtils;
 

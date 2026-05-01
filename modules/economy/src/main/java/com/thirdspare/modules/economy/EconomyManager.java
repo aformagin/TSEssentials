@@ -1,8 +1,8 @@
-package com.thirdspare.economy;
+package com.thirdspare.modules.economy;
 
 import com.hypixel.hytale.server.core.util.Config;
-import com.thirdspare.data.economy.EconomyAccountsConfig;
-import com.thirdspare.data.economy.EconomyConfig;
+import com.thirdspare.modules.economy.data.EconomyAccountsConfig;
+import com.thirdspare.modules.economy.data.EconomyConfig;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
