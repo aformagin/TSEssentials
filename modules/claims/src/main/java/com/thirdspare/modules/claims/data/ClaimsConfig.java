@@ -1,5 +1,6 @@
-package com.thirdspare.data.claims;
+package com.thirdspare.modules.claims.data;
 
+import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.ObjectMapCodec;
@@ -9,43 +10,48 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClaimsConfig {
-    private Map<String, Claim> claims;
+    private int schemaVersion;
+    private Map<String, ClaimDefinition> claims;
 
     public ClaimsConfig() {
+        this.schemaVersion = 1;
         this.claims = new HashMap<>();
     }
 
-    public Collection<Claim> getAllClaims() {
+    public int getSchemaVersion() { return schemaVersion; }
+
+    public Collection<ClaimDefinition> getAllClaims() {
         return claims.values();
     }
 
-    public Claim getClaim(String id) {
-        return claims.get(id);
+    public ClaimDefinition getClaim(String id) {
+        return id == null ? null : claims.get(id);
     }
 
-    public void setClaim(Claim claim) {
+    public void putClaim(ClaimDefinition claim) {
         if (claim != null && claim.getId() != null && !claim.getId().isBlank()) {
             claims.put(claim.getId(), claim);
         }
     }
 
     public boolean removeClaim(String id) {
-        return claims.remove(id) != null;
+        return id != null && claims.remove(id) != null;
     }
 
-    public int getClaimCount() {
-        return claims.size();
-    }
+    public int getClaimCount() { return claims.size(); }
 
     public static final BuilderCodec<ClaimsConfig> CODEC = BuilderCodec.builder(ClaimsConfig.class, ClaimsConfig::new)
+            .append(new KeyedCodec<>("SchemaVersion", Codec.INTEGER),
+                    (c, v) -> c.schemaVersion = v != null ? v : 1,
+                    c -> c.schemaVersion).add()
             .append(new KeyedCodec<>("Claims",
                     new ObjectMapCodec<>(
-                            Claim.CODEC,
+                            ClaimDefinition.CODEC,
                             HashMap::new,
                             key -> key,
                             str -> str
                     )),
-                    (config, value) -> config.claims = value != null ? new HashMap<>(value) : new HashMap<>(),
-                    config -> config.claims).add()
+                    (c, v) -> c.claims = v != null ? new HashMap<>(v) : new HashMap<>(),
+                    c -> c.claims).add()
             .build();
 }

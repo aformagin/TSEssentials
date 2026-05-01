@@ -1,0 +1,56 @@
+Group {
+  Background: #000000(0.35);
+  LayoutMode: Middle;
+
+  Group #ClaimViewPanel {
+    Anchor: (Width: 640, Height: 380);
+    Background: #111111(0.86);
+    OutlineSize: 1;
+    OutlineColor: #ffffff(0.18);
+    LayoutMode: Top;
+    Padding: (Full: 2);
+
+    Group #Header {
+      Anchor: (Height: 58, Bottom: 1);
+      Background: #343434(0.92);
+      LayoutMode: Left;
+      Padding: (Horizontal: 18);
+
+      Label #ClaimName {
+        FlexWeight: 1;
+        Style: (FontSize: 22, RenderBold: true, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "Claim Info";
+      }
+    }
+
+    Group #Body {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Padding: (Full: 22);
+
+      Label #OwnerText {
+        Anchor: (Height: 32, Bottom: 8);
+        Style: (FontSize: 15, TextColor: #ffffff, VerticalAlignment: Center);
+        Text: "";
+      }
+
+      Label #BoundsText {
+        Anchor: (Height: 28, Bottom: 8);
+        Style: (FontSize: 13, TextColor: #dddddd, VerticalAlignment: Center, Wrap: true);
+        Text: "";
+      }
+
+      Label #TrustedText {
+        Anchor: (Height: 28, Bottom: 8);
+        Style: (FontSize: 13, TextColor: #dddddd, VerticalAlignment: Center);
+        Text: "";
+      }
+
+      Label #StatusText {
+        Anchor: (Height: 32);
+        Style: (FontSize: 14, RenderBold: true, TextColor: #8DE969, VerticalAlignment: Center);
+        Text: "";
+      }
+    }
+  }
+}
