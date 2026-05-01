@@ -1,4 +1,4 @@
-package com.thirdspare.commands.economy;
+package com.thirdspare.modules.economy.commands;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -6,9 +6,9 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.thirdspare.economy.EconomyService;
+import com.thirdspare.modules.economy.EconomyService;
+import com.thirdspare.modules.economy.ui.EconomyAdminPage;
 import com.thirdspare.permissions.TSEssentialsPermissions;
-import com.thirdspare.ui.EconomyAdminPage;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;

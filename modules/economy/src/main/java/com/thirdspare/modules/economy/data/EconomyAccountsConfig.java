@@ -1,4 +1,4 @@
-package com.thirdspare.data.economy;
+package com.thirdspare.modules.economy.data;
 
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
