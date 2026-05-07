@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.economy.EconomyService;
 import com.thirdspare.modules.economy.ui.EconomyPage;
 import com.thirdspare.permissions.TSEssentialsPermissions;
@@ -17,9 +16,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class WalletCommand extends AbstractCommand {
     private final EconomyService economyService;
-    private final TSEUiDocument economyUi;
+    private final String economyUi;
 
-    public WalletCommand(EconomyService economyService, TSEUiDocument economyUi) {
+    public WalletCommand(EconomyService economyService, String economyUi) {
         super("wallet", "Open your economy wallet");
         requirePermission(TSEssentialsPermissions.ECONOMY_UI);
         this.economyService = economyService;

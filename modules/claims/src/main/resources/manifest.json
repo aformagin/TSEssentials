@@ -1,8 +1,8 @@
 {
   "Group": "Thirdspare",
-  "Name": "TSEssentials",
-  "Version": "1.1.0",
-  "Description": "Just the essentials.",
+  "Name": "TSEssentialsClaims",
+  "Version": "1.0.0",
+  "Description": "Optional TSEssentials land claims plugin.",
   "Authors": [
     {
       "Name": "Auti117",
@@ -12,9 +12,11 @@
   ],
   "Website": "https://thirdspare.com",
   "ServerVersion": "2026.03.26-89796e57b",
-  "Dependencies": {},
+  "Dependencies": {
+    "Thirdspare:TSEssentials": ">=1.1.0"
+  },
   "OptionalDependencies": {},
   "DisabledByDefault": false,
   "IncludesAssetPack": true,
-  "Main": "com.thirdspare.TSEssentials"
+  "Main": "com.thirdspare.modules.claims.ClaimsPlugin"
 }

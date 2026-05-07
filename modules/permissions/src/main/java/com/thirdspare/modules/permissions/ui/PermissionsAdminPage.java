@@ -16,7 +16,6 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.modules.core.PermissionNodeDescriptor;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.permissions.PermissionsManager;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.data.PermissionsGroup;
@@ -34,14 +33,14 @@ public class PermissionsAdminPage extends InteractiveCustomUIPage<PermissionsAdm
     private static final int MAX_MEMBER_ROWS = 8;
 
     private final PermissionsService service;
-    private final TSEUiDocument uiDocument;
+    private final String uiDocument;
     private String selectedGroupName = "";
     private String selectedMemberTarget = "";
     private String pendingDefaultGroupName = "";
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public PermissionsAdminPage(PlayerRef playerRef, PermissionsService service, TSEUiDocument uiDocument) {
+    public PermissionsAdminPage(PlayerRef playerRef, PermissionsService service, String uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, PermissionsEventData.CODEC);
         this.service = service;
         this.uiDocument = Objects.requireNonNull(uiDocument, "uiDocument");
@@ -50,7 +49,7 @@ public class PermissionsAdminPage extends InteractiveCustomUIPage<PermissionsAdm
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        uiDocument.appendTo(builder);
+        builder.append(uiDocument);
         ensureSelection();
         render(builder, events);
     }

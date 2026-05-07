@@ -15,7 +15,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.chat.ChannelManager;
 import com.thirdspare.modules.chat.data.ChatChannel;
 
@@ -37,12 +36,12 @@ public class ChatEditPage extends InteractiveCustomUIPage<ChatEditPage.ChatEditE
     };
 
     private final ChannelManager channelManager;
-    private final TSEUiDocument uiDocument;
+    private final String uiDocument;
     private String selectedChannelName;
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public ChatEditPage(PlayerRef playerRef, ChannelManager channelManager, TSEUiDocument uiDocument) {
+    public ChatEditPage(PlayerRef playerRef, ChannelManager channelManager, String uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, ChatEditEventData.CODEC);
         this.channelManager = channelManager;
         this.uiDocument = Objects.requireNonNull(uiDocument, "uiDocument");
@@ -51,7 +50,7 @@ public class ChatEditPage extends InteractiveCustomUIPage<ChatEditPage.ChatEditE
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        uiDocument.appendTo(builder);
+        builder.append(uiDocument);
         ensureSelection();
         render(builder, events);
     }

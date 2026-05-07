@@ -10,12 +10,10 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.thirdspare.modules.chat.ChannelManager;
 import com.thirdspare.modules.chat.TSEChatPermissionsNodes;
 import com.thirdspare.modules.chat.data.ChatChannel;
 import com.thirdspare.modules.chat.ui.ChatEditPage;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -28,9 +26,9 @@ public class ChatEditCommand extends AbstractCommand {
     private final OptionalArg<String> valueArg;
     private final OptionalArg<String> value2Arg;
     private final OptionalArg<String> value3Arg;
-    private final TSEUiDocument chatEditUi;
+    private final String chatEditUi;
 
-    public ChatEditCommand(ChannelManager channelManager, TSEUiDocument chatEditUi) {
+    public ChatEditCommand(ChannelManager channelManager, String chatEditUi) {
         super("chatedit", "Edit chat channels");
         this.channelManager = channelManager;
         this.chatEditUi = chatEditUi;

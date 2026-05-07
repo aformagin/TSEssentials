@@ -17,7 +17,7 @@ Designed with modularity and performance in mind, TSEssentials serves as the bac
 -   **Teleport Requests (TPA):** Players can request to teleport to each other.
 -   **Economy System (V1):** Digital currency system with player accounts and admin management.
 -   **Land Claims (V1):** Player-managed area protection with trusted member support.
--   **Modular Extensions:** Optional drop-in modules for enhanced functionality.
+-   **Modular Extensions:** Optional Hytale plugins for enhanced functionality.
     -   **Chat Channels (V1):** Joinable channels, range support, and nicknames.
     -   **Permissions (V1):** Group/node management with an in-game admin UI.
     -   **Land Claims (V1):** Area protection and management.
@@ -30,22 +30,23 @@ Designed with modularity and performance in mind, TSEssentials serves as the bac
 -   [**Command Reference**](COMMANDS.md): Detailed information on all core and modular commands.
 -   [**Permissions Progress Report**](Research/Planning%20Documents/Permissions%20Progress%20Report.md): Detailed implementation status of the modular systems.
 
-## TSEssentials Module System
+## TSEssentials Extension Plugins
 
-TSEssentials features a robust, optional module system that allows for additive functionality.
+TSEssentials supports optional extension plugins that depend on the core `Thirdspare:TSEssentials` plugin.
 
-### Drop-in Modules
+### Installing Extensions
 
-To install an optional module:
-1.  Create a folder named `TSEssentialsModules` in the server's `/Mods/` directory or client's `/UserData/Mods/` directory (beside the main `TSEssentials.jar`).
-2.  Drop the module JAR (e.g., `TSEssentials-Chat-1.0.jar`) into this folder.
+To install an optional extension:
+1.  Install the core `TSEssentials` JAR in the server's `/Mods/` directory or client's `/UserData/Mods/` directory.
+2.  Drop the extension plugin JAR (e.g., `TSEssentials-Chat-1.0.jar`) into the same `Mods` folder.
 3.  Restart the server.
 
-### Available Optional Modules
+### Available Optional Extension Plugins
 
-| Module | Description | Build Command |
+| Plugin | Description | Build Command |
 | :--- | :--- | :--- |
 | **Chat** | Multi-channel chat, range-based local chat, nicknames, and mutes. | `mvn -f modules/chat/pom.xml clean package` |
+| **Economy** | Currency accounts, payments, wallet UI, and economy admin controls. | `mvn -f modules/economy/pom.xml clean package` |
 | **Permissions** | Group-based permissions, user records, and an in-game admin UI. | `mvn -f modules/permissions/pom.xml clean package` |
 | **Claims** | Player-managed land claims and area protection. | `mvn -f modules/claims/pom.xml clean package` |
 
@@ -63,16 +64,17 @@ To install an optional module:
 
 ## Configuration Files
 
-The plugin and its modules generate configuration files in the server's data directory.
+The core plugin and each extension plugin generate configuration files in their own Hytale plugin data directory.
 
 -   **Core:** `player_data.json`, `warp_data.json`, `spawn_data.json`
--   **Chat Module:** `modules/chat/chat_channels.json`
--   **Permissions Module:** `modules/permissions/permissions_groups.json`, `modules/permissions/permissions_users.json`
--   **Claims Module:** `modules/claims/claims_data.json`
+-   **Chat Plugin:** `chat_channels.json`
+-   **Economy Plugin:** `economy_config.json`, `economy_accounts.json`
+-   **Permissions Plugin:** `permissions_groups.json`, `permissions_users.json`
+-   **Claims Plugin:** `claims_data.json`
 
 ## Deployment
 
 1.  Build the core plugin: `mvn clean install`
-2.  Build desired modules (see [Available Optional Modules](#available-optional-modules)).
+2.  Build desired extension plugins (see [Available Optional Extension Plugins](#available-optional-extension-plugins)).
 3.  Deploy core JAR to `Mods/`.
-4.  Deploy module JARs to `Mods/TSEssentialsModules/`.
+4.  Deploy extension plugin JARs to `Mods/`.

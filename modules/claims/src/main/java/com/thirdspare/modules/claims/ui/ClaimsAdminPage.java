@@ -16,7 +16,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.claims.ClaimSelectionService;
 import com.thirdspare.modules.claims.ClaimsService;
 import com.thirdspare.modules.claims.data.ClaimDefinition;
@@ -29,14 +28,14 @@ public class ClaimsAdminPage extends InteractiveCustomUIPage<ClaimsAdminPage.Cla
 
     private final ClaimsService claimsService;
     private final PlayerRef viewer;
-    private final TSEUiDocument adminUiDocument;
-    private final TSEUiDocument membersUiDocument;
+    private final String adminUiDocument;
+    private final String membersUiDocument;
     private String selectedClaimId;
     private String statusMessage = "";
     private boolean errorStatus;
 
     public ClaimsAdminPage(PlayerRef playerRef, ClaimsService claimsService,
-                           TSEUiDocument adminUiDocument, TSEUiDocument membersUiDocument) {
+                           String adminUiDocument, String membersUiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, ClaimsAdminEventData.CODEC);
         this.viewer = playerRef;
         this.claimsService = claimsService;
@@ -47,7 +46,7 @@ public class ClaimsAdminPage extends InteractiveCustomUIPage<ClaimsAdminPage.Cla
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        adminUiDocument.appendTo(builder);
+        builder.append(adminUiDocument);
         ensureSelection();
         render(builder, events);
     }

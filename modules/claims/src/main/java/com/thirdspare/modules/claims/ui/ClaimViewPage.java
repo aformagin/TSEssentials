@@ -11,7 +11,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.claims.ClaimsService;
 import com.thirdspare.modules.claims.data.ClaimDefinition;
 
@@ -21,11 +20,11 @@ import java.util.Optional;
 public class ClaimViewPage extends InteractiveCustomUIPage<ClaimViewPage.ClaimViewEventData> {
     private final ClaimsService claimsService;
     private final PlayerRef viewer;
-    private final TSEUiDocument uiDocument;
+    private final String uiDocument;
     private String claimId;
 
     public ClaimViewPage(PlayerRef playerRef, ClaimsService claimsService,
-                         TSEUiDocument uiDocument, String claimId) {
+                         String uiDocument, String claimId) {
         super(playerRef, CustomPageLifetime.CanDismiss, ClaimViewEventData.CODEC);
         this.viewer = playerRef;
         this.claimsService = claimsService;
@@ -36,7 +35,7 @@ public class ClaimViewPage extends InteractiveCustomUIPage<ClaimViewPage.ClaimVi
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        uiDocument.appendTo(builder);
+        builder.append(uiDocument);
         render(builder);
     }
 

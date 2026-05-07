@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.TSEPermissionsNodes;
 import com.thirdspare.modules.permissions.ui.PermissionsAdminPage;
@@ -17,9 +16,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class PermissionsUICommand extends AbstractCommand {
     private final PermissionsService service;
-    private final TSEUiDocument adminUi;
+    private final String adminUi;
 
-    public PermissionsUICommand(PermissionsService service, TSEUiDocument adminUi) {
+    public PermissionsUICommand(PermissionsService service, String adminUi) {
         super("tspermui", "Open permissions admin controls");
         requirePermission(TSEPermissionsNodes.UI);
         this.service = service;
@@ -32,7 +31,7 @@ public class PermissionsUICommand extends AbstractCommand {
         return CompletableFuture.completedFuture(null);
     }
 
-    public static void openPage(CommandContext context, PermissionsService service, TSEUiDocument adminUi) {
+    public static void openPage(CommandContext context, PermissionsService service, String adminUi) {
         PlayerRef player = CommandUtils.getPlayerFromContext(context, true);
         if (player == null) {
             return;

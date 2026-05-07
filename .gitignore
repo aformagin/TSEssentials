@@ -40,3 +40,4 @@ build/
 CLAUDE.md
 .claude/settings.local.json
 /Research
+/.claude/worktrees

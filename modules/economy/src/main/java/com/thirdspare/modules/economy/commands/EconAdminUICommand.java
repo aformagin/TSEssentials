@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.economy.EconomyService;
 import com.thirdspare.modules.economy.ui.EconomyAdminPage;
 import com.thirdspare.permissions.TSEssentialsPermissions;
@@ -17,9 +16,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class EconAdminUICommand extends AbstractCommand {
     private final EconomyService economyService;
-    private final TSEUiDocument economyAdminUi;
+    private final String economyAdminUi;
 
-    public EconAdminUICommand(EconomyService economyService, TSEUiDocument economyAdminUi) {
+    public EconAdminUICommand(EconomyService economyService, String economyAdminUi) {
         super("ecoui", "Open economy admin controls");
         requirePermission(TSEssentialsPermissions.ECO_ADMIN_UI);
         this.economyService = economyService;

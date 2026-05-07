@@ -1,6 +1,6 @@
 package com.thirdspare.modules.permissions;
 
-import com.thirdspare.modules.core.PermissionCatalogContributor;
+import com.thirdspare.api.TSEssentialsApi;
 import com.thirdspare.modules.core.PermissionNodeDescriptor;
 import com.thirdspare.permissions.TSEssentialsPermissions;
 
@@ -32,13 +32,8 @@ public class PermissionNodeRegistry {
         }
     }
 
-    public void registerContributor(PermissionCatalogContributor contributor) {
-        if (contributor != null) {
-            registerAll(contributor.permissionNodes());
-        }
-    }
-
     public List<PermissionNodeDescriptor> listNodes() {
+        registerAll(TSEssentialsApi.permissionNodes());
         return new ArrayList<>(nodes.values());
     }
 

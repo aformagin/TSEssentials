@@ -13,7 +13,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.claims.ClaimsService;
 import com.thirdspare.modules.claims.data.ClaimDefinition;
 import com.thirdspare.utils.PlayerLookup;
@@ -29,14 +28,14 @@ public class ClaimMembersPage extends InteractiveCustomUIPage<ClaimMembersPage.C
 
     private final ClaimsService claimsService;
     private final PlayerRef viewer;
-    private final TSEUiDocument uiDocument;
+    private final String uiDocument;
     private String selectedClaimId;
     private String selectedMemberUuid;
     private String statusMessage = "";
     private boolean errorStatus;
 
     public ClaimMembersPage(PlayerRef playerRef, ClaimsService claimsService,
-                            TSEUiDocument uiDocument, String selectedClaimId) {
+                            String uiDocument, String selectedClaimId) {
         super(playerRef, CustomPageLifetime.CanDismiss, ClaimMembersEventData.CODEC);
         this.viewer = playerRef;
         this.claimsService = claimsService;
@@ -47,7 +46,7 @@ public class ClaimMembersPage extends InteractiveCustomUIPage<ClaimMembersPage.C
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        uiDocument.appendTo(builder);
+        builder.append(uiDocument);
         ensureSelection();
         render(builder, events);
     }

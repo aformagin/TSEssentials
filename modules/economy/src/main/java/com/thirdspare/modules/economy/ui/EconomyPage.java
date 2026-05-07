@@ -13,7 +13,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.economy.EconomyManager;
 import com.thirdspare.modules.economy.EconomyService;
 
@@ -24,11 +23,11 @@ public class EconomyPage extends InteractiveCustomUIPage<EconomyPage.EconomyEven
     private final PlayerRef playerRef;
     private final EconomyService economyService;
     private final EconomyManager economyManager;
-    private final TSEUiDocument uiDocument;
+    private final String uiDocument;
     private String statusMessage = "";
     private boolean errorStatus;
 
-    public EconomyPage(PlayerRef playerRef, EconomyService economyService, TSEUiDocument uiDocument) {
+    public EconomyPage(PlayerRef playerRef, EconomyService economyService, String uiDocument) {
         super(playerRef, CustomPageLifetime.CanDismiss, EconomyEventData.CODEC);
         this.playerRef = playerRef;
         this.economyService = economyService;
@@ -39,7 +38,7 @@ public class EconomyPage extends InteractiveCustomUIPage<EconomyPage.EconomyEven
     @Override
     public void build(@Nonnull Ref<EntityStore> ref, @Nonnull UICommandBuilder builder,
                       @Nonnull UIEventBuilder events, @Nonnull Store<EntityStore> store) {
-        uiDocument.appendTo(builder);
+        builder.append(uiDocument);
         render(builder, events);
     }
 

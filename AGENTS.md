@@ -247,22 +247,22 @@ public class ExampleSubCommand extends AbstractCommand {
 
 ---
 
-## 14. Modular System Design
+## 14. Extension Plugin Design
 
-TSEssentials uses a "drop-in" module system allowing optional features to be added as separate JAR files.
+TSEssentials optional systems are separate Hytale plugins that depend on the core plugin.
 
 ### 14.1. Architecture
-- **API Entry Point:** `com.thirdspare.modules.api.TSEModule`
-- **Discovery:** Uses Java's `ServiceLoader`. Modules must provide a service file in `META-INF/services/com.thirdspare.modules.api.TSEModule`.
-- **Isolation:** Each module is loaded into its own classloader to prevent dependency conflicts.
+- **Core dependency:** Extension manifests must require `Thirdspare:TSEssentials`.
+- **Entry point:** Each extension has its own `JavaPlugin` subclass and root `manifest.json`.
+- **Assets:** UI resources are bundled inside the extension plugin JAR and loaded through native Hytale asset-pack support.
 
 ### 14.2. Lifecycle Hooks
-- `register(TSEModuleContext context)`: Primary setup phase. Register configs, commands, and ECS components here.
-- `enable()`: Called after all modules are registered. Activate main logic/listeners here.
-- `disable()`: Cleanup phase. Unregister listeners and clear temporary state.
+- Register configs with the extension plugin's own `withConfig(...)` fields.
+- Register commands, events, ECS components, and entity systems through the extension plugin's inherited registries.
+- Register permission catalog entries through `com.thirdspare.api.TSEssentialsApi`.
 
-### 14.3. Module Packaging
-- JAR files must be placed in the `TSEssentialsModules` directory.
-- JAR names should follow the pattern `TSEssentials-<ModuleName>-<Version>.jar`.
-- Module configurations are automatically isolated to `UserData/ModData/TSEssentials/modules/<module-id>/`.
+### 14.3. Packaging
+- Extension plugin JARs are placed directly in `UserData/Mods` beside the core plugin JAR.
+- Do not use `TSEssentialsModules` or `META-INF/services/com.thirdspare.modules.api.TSEModule`.
+- Extension configurations live in each extension plugin's native data directory.
 

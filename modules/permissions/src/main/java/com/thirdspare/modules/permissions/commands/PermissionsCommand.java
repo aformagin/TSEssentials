@@ -9,7 +9,6 @@ import com.thirdspare.modules.permissions.PermissionsManager;
 import com.thirdspare.modules.permissions.PermissionsService;
 import com.thirdspare.modules.permissions.TSEPermissionsNodes;
 import com.thirdspare.modules.permissions.data.PermissionsGroup;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.utils.CommandUtils;
 
 import javax.annotation.Nonnull;
@@ -17,14 +16,14 @@ import java.util.concurrent.CompletableFuture;
 
 public class PermissionsCommand extends AbstractCommand {
     private final PermissionsService service;
-    private final TSEUiDocument adminUi;
+    private final String adminUi;
     private final OptionalArg<String> areaArg;
     private final OptionalArg<String> actionArg;
     private final OptionalArg<String> targetArg;
     private final OptionalArg<String> valueArg;
     private final OptionalArg<String> extraArg;
 
-    public PermissionsCommand(PermissionsService service, TSEUiDocument adminUi) {
+    public PermissionsCommand(PermissionsService service, String adminUi) {
         super("tsperm", "Manage TSEssentials permissions");
         requirePermission(TSEPermissionsNodes.UI);
         this.service = service;

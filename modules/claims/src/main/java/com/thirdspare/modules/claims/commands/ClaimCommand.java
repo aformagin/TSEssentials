@@ -10,7 +10,6 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.thirdspare.modules.api.TSEUiDocument;
 import com.thirdspare.modules.claims.ClaimsPermissionNodes;
 import com.thirdspare.modules.claims.ClaimsService;
 import com.thirdspare.modules.claims.data.ClaimDefinition;
@@ -28,9 +27,9 @@ public class ClaimCommand extends AbstractCommand {
     private static final String COLOR_WARN = "#FFB347";
 
     private final ClaimsService claimsService;
-    private final TSEUiDocument membersUi;
+    private final String membersUi;
 
-    public ClaimCommand(ClaimsService claimsService, TSEUiDocument membersUi) {
+    public ClaimCommand(ClaimsService claimsService, String membersUi) {
         super("claim", "Manage land claims");
         requirePermission(ClaimsPermissionNodes.COMMAND);
         this.claimsService = claimsService;
