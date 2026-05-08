@@ -1,100 +1,110 @@
-# TSEssentials Module System Developer Guide
+# TSEssentials Extension Plugin Developer Guide
 
-TSEssentials features a dynamic module system that allows developers to extend the plugin's functionality without modifying the core codebase. This guide outlines the requirements and steps to create your own "drop-in" modules.
+TSEssentials supports optional features through normal Hytale plugins that declare a dependency on the core TSEssentials plugin. This keeps load ordering, asset loading, and dependency failures in Hytale's supported plugin system instead of a custom module classloader.
 
 ## 1. Requirements
 
 -   **Java Development Kit (JDK) 25**: Matches the Hytale and TSEssentials core requirement.
--   **TSEssentials Core**: Your module must depend on the `TSEssentials` JAR to access the API.
--   **ServiceLoader**: Discovery is handled via Java's native `ServiceLoader` mechanism.
+-   **TSEssentials Core Plugin**: Extension plugins must depend on the core `Thirdspare:TSEssentials` plugin.
+-   **Hytale Plugin Manifest**: Each extension plugin must include a root `manifest.json`.
 
-## 2. Core API Components
+## 2. Plugin Dependency
 
-### `TSEModule`
-The entry point for your module. Every module must implement this interface.
-
--   `descriptor()`: Returns metadata about the module.
--   `register(TSEModuleContext context)`: Called during discovery. Use this to register configs, commands, and components.
--   `enable()`: Called after registration to activate module logic.
--   `disable()`: Called during server shutdown for cleanup.
--   `onPlayerReady(PlayerRef player)`: Optional hook for per-player initialization.
-
-### `TSEModuleDescriptor`
-A record containing module metadata:
--   `id`: Unique identifier (e.g., `"my-cool-feature"`).
--   `displayName`: Human-readable name.
--   `version`: Module version string.
--   `minCoreVersion`/`maxCoreVersion`: Compatibility range for the TSEssentials core.
-
-### `TSEModuleContext`
-Provides your module with a bridge to the core plugin's services:
--   `registerConfig(key, codec)`: Creates a persistent JSON configuration file.
--   `registerCommand(command)`: Registers a Hytale command.
--   `registerComponent(type, id, codec)`: Registers a custom ECS component for player/entity data.
--   `eventRegistry()`: Access to Hytale's global event system.
--   `logger()`: A pre-configured Hytale logger for your module.
-
-## 3. Creating Your First Module
-
-### Step 1: Project Setup (Maven Example)
-Add TSEssentials as a provided dependency in your `pom.xml`:
+Add TSEssentials as a provided Maven dependency:
 
 ```xml
 <dependency>
     <groupId>com.thirdspare</groupId>
     <artifactId>TSEssentials</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <scope>provided</scope>
 </dependency>
 ```
 
-### Step 2: Implement `TSEModule`
-Create your module class:
+Declare the Hytale plugin dependency in your extension plugin `manifest.json`:
+
+```json
+{
+  "Group": "Thirdspare",
+  "Name": "TSEssentialsExample",
+  "Version": "1.0.0",
+  "ServerVersion": "2026.03.26-89796e57b",
+  "Dependencies": {
+    "Thirdspare:TSEssentials": ">=1.1.0"
+  },
+  "Main": "com.example.tse.ExamplePlugin"
+}
+```
+
+Set `"IncludesAssetPack": true` when the plugin ships UI documents or other assets under `Common/`.
+
+## 3. Plugin Entry Point
+
+Extension plugins should extend Hytale's `JavaPlugin` directly:
 
 ```java
-public class MyModule implements TSEModule {
-    private TSEModuleContext context;
-
+public final class ExamplePlugin extends JavaPlugin {
     @Override
-    public TSEModuleDescriptor descriptor() {
-        return new TSEModuleDescriptor(
-            "my_module", "My Custom Module", "1.0.0", "1.1.0", "1.2.0"
-        );
+    public void setup() {
+        registerCommand(new ExampleCommand());
+        eventRegistry().register(ExampleEvent.class, this::handleExampleEvent);
     }
 
     @Override
-    public void register(TSEModuleContext context) throws Exception {
-        this.context = context;
-        // Register commands or configs here
-        context.registerCommand(new MyCustomCommand());
+    public void start() {
+        logger().atInfo().log("TSEssentials example extension enabled.");
     }
 
     @Override
-    public void enable() throws Exception {
-        context.logger().atInfo().log("My Module Enabled!");
-    }
-
-    @Override
-    public void disable() throws Exception {
-        // Cleanup
+    public void shutdown() {
+        // Clear runtime-only state here when needed.
     }
 }
 ```
 
-### Step 3: Register the Service
-To allow TSEssentials to discover your module, you must create a service provider file:
-1.  Create the directory: `src/main/resources/META-INF/services/`
-2.  Create a file named: `com.thirdspare.modules.api.TSEModule`
-3.  Inside the file, put the fully qualified name of your implementation class (e.g., `com.example.MyModule`).
+Use the plugin's own inherited registration APIs for commands, events, configs, ECS components, entity systems, and asset-backed UI documents.
 
-### Step 4: Build and Deploy
-1.  Package your module as a plain JAR (e.g., `mvn package`).
-2.  Name the JAR starting with `TSEssentials-` (e.g., `TSEssentials-MyModule.jar`).
-3.  Place the JAR in the `TSEssentialsModules` folder on your Hytale server.
+## 4. Shared TSEssentials API
 
-## 4. Best Practices
+Core exposes `com.thirdspare.api.TSEssentialsApi` for small shared extension points. Current first-party modules use it to register permission-node metadata so the permissions plugin can display nodes from core and sibling plugins.
 
--   **Isolation**: Modules are loaded into individual classloaders. Avoid relying on classes from other optional modules unless you have verified their presence.
--   **Configuration**: Use the `TSEModuleContext#registerConfig` method. This ensures your configuration is stored in the correct module-specific subdirectory (`UserData/ModData/TSEssentials/modules/<module-id>/`).
--   **UI Resources**: Custom UI documents should be packaged in the core plugin if possible, as document loading can be strict across different classloaders.
--   **Clean Shutdown**: Always use the `disable()` method to close files, unregister listeners, or stop background tasks to prevent memory leaks.
+Register public permission constants during setup:
+
+```java
+TSEssentialsApi.registerPermissionConstants(
+    ExamplePermissions.class,
+    "Example Plugin",
+    "Example command permission"
+);
+```
+
+## 5. UI Resources
+
+Package UI documents inside the extension plugin JAR:
+
+```text
+src/main/resources/Common/UI/Custom/Example.ui
+```
+
+With `"IncludesAssetPack": true`, open UI documents through the normal Custom UI append path:
+
+```java
+UICommandBuilder builder = new UICommandBuilder();
+builder.append("Example.ui");
+```
+
+## 6. Build and Deploy
+
+1.  Build the core plugin and extension plugin JARs.
+2.  Place `TSEssentials-1.1.0.jar` directly in `UserData/Mods`.
+3.  Place extension plugin JARs directly in `UserData/Mods`.
+4.  Do not use the old `TSEssentialsModules` folder.
+5.  Do not include `META-INF/services/com.thirdspare.modules.api.TSEModule`; that custom loader has been retired.
+
+## 7. Best Practices
+
+-   Keep command parsing thin and place behavior in services or managers.
+-   Use each plugin's own `withConfig(...)` registration for authoritative JSON configs.
+-   Use ECS components for per-player persistent data when appropriate.
+-   Keep permission strings stable after release.
+-   Prefer native Hytale plugin dependencies over optional reflection between sibling plugins.

@@ -76,7 +76,7 @@ This document provides a comprehensive list of all commands available in TSEssen
 
 ## Optional Module Commands
 
-These commands are only available when the corresponding module JAR is present in the `TSEssentialsModules` folder.
+These commands are only available when the corresponding extension plugin JAR is present in `UserData/Mods` or the server's `Mods/` alongside the core TSEssentials plugin.
 
 ### Chat Module Commands
 
